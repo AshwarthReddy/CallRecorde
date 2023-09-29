@@ -1,0 +1,171 @@
+<resources>
+    <style name="AppThemeLight" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="android:windowBackground">@color/backgroundLightTheme</item>
+        <item name="android:textColorPrimary">@color/text_on_light</item>
+        <!-- https://stackoverflow.com/questions/17769198/android-change-color-of-disabled-text-using-theme-style-->
+        <item name="android:textColor">@color/text_on_light</item>
+        <item name="contactSlotStyle">@style/contactSlotLight</item>
+        <item name="separatorStyle">@style/separatorLight</item>
+        <item name="detailHeaderStyle">@style/detailHeader.Light</item>
+        <item name="tabletCurrentSelectionStyle">@style/tabletCurrentSelectionLight</item>
+        <item name="playerControlStyle">@style/playerControlStyleLight</item>
+        <item name="drawerStyle">@style/drawerStyleLight</item>
+        <item name="helpTabStyle">@style/helpTabStyleLight</item>
+<!-- https://stackoverflow.com/questions/36261421/how-to-change-android-button-text-color-globally-in-theme -->
+       <item name="materialButtonStyle">@style/SettingsButtonColorLight</item>
+    </style>
+
+    <style name="AppThemeDark" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="colorAccent">@color/colorAccentLight</item>
+
+        <item name="android:textColorPrimary">@color/text_on_dark</item>
+        <item name="android:textColor">@color/text_on_dark</item>
+        <item name="contactSlotStyle">@style/contactSlotDark</item>
+        <item name="separatorStyle">@style/separatorDark</item>
+        <item name="detailHeaderStyle">@style/detailHeader.Dark</item>
+        <item name="tabletCurrentSelectionStyle">@style/tabletCurrentSelectionDark</item>
+        <item name="playerControlStyle">@style/playerControlStyleDark</item>
+        <item name="drawerStyle">@style/drawerStyleDark</item>
+        <item name="helpTabStyle">@style/helpTabStyleDark</item>
+        <item name="materialButtonStyle">@style/SettingsButtonColorDark</item>
+        <item name="android:colorBackground">@color/darkBackground</item>
+    </style>
+
+<!-- Stiluri diferite pentru un element în funcție de tema selectată:
+https://stackoverflow.com/questions/30487616/android-overriding-a-style-per-theme-->
+    <style name="tabletCurrentSelectionLight">
+        <item name="android:background">@color/colorAccent</item>
+    </style>
+
+    <style name="tabletCurrentSelectionDark">
+        <item name="android:background">@color/colorAccent</item>
+    </style>
+
+    <style name="contactSlotLight">
+        <item name="android:background">@color/slotLight</item>
+    </style>
+
+    <style name="contactSlotDark">
+        <item name="android:background">@color/slotAndDetailHeaderDark</item>
+    </style>
+
+    <style name="separatorLight">
+        <item name="android:background">#80777777</item>
+    </style>
+
+    <style name="separatorDark">
+        <item name="android:background">#80999999</item>
+    </style>
+
+    <style name="detailHeader">
+        <item name="android:elevation">1dp</item>
+    </style>
+
+    <style name="detailHeader.Light">
+        <item name="android:background">@color/detailHeaderBackgroundLight</item>
+    </style>
+
+    <style name="detailHeader.Dark">
+        <item name="android:background">@color/slotAndDetailHeaderDark</item>
+    </style>
+
+    <style name="setupButtons" parent="TextAppearance.AppCompat.Button">
+        <item name="android:backgroundTint">@color/setupButton</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="setupParagraphs">
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:lineSpacingMultiplier">1.3</item>
+    </style>
+
+    <style name="playerControlStyleParent">
+        <item name="indicator_color">@color/colorAccent</item>
+        <item name="indicator_width">@dimen/croller_indicator_width</item>
+        <item name="is_continuous">true</item>
+        <item name="label_size">@dimen/croller_label_size</item>
+        <item name="min">0</item>
+        <!--<item name="back_circle_radius">80</item>-->
+        <!--<item name="main_circle_radius">60</item>-->
+        <item name="progress_primary_color">@color/colorAccent</item>
+        <item name="android:layout_width">@dimen/croller_width</item>
+        <item name="android:layout_height">@dimen/croller_height</item>
+        <item name="progress_primary_stroke_width">@dimen/croller_progress_primary_stroke_width</item>
+        <item name="progress_secondary_stroke_width">@dimen/croller_progress_secondary_stroke_width</item>
+    </style>
+
+    <style name="playerControlStyleLight" parent="playerControlStyleParent">
+        <item name="main_circle_color">#ddd</item>
+        <item name="progress_secondary_color">#000</item>
+        <item name="label_color">@color/text_on_light</item>
+    </style>
+
+
+    <style name="playerControlStyleDark" parent="playerControlStyleParent">
+        <item name="main_circle_color">#fff</item>
+        <item name="progress_secondary_color">#ededed</item>
+        <item name="label_color">@color/text_on_dark</item>
+    </style>
+
+    <!--Necesar pentru a albi săgeata back a toolbarului -->
+    <style name="toolbar_theme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorControlNormal">@color/textOnDark</item>
+    </style>
+    
+    <style name="toolbar_font" parent="@style/Base.TextAppearance.AppCompat.Title">
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="toolbar_font_contacts" parent="@style/Base.TextAppearance.AppCompat.Title">
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="drawerStyleLight">
+        <item name="itemTextColor">@color/text_on_light</item>
+        <item name="itemIconTint">@color/text_on_light</item>
+    </style>
+
+    <style name="drawerStyleDark">
+        <item name="itemTextColor">@color/text_on_dark</item>
+        <item name="itemIconTint">@color/text_on_dark</item>
+    </style>
+
+    <style name="helpTabStyleLight">
+        <item name="tabTextColor">@color/text_on_light</item>
+    </style>
+
+    <style name="helpTabStyleDark">
+        <item name="tabTextColor">@color/text_on_dark</item>
+    </style>
+
+    <style name="SettingsButtonColorLight" parent="Widget.MaterialComponents.Button">
+        <item name="materialThemeOverlay">@style/ButtonStyleTextColorLight</item>
+    </style>
+
+    <style name="ButtonStyleTextColorLight">
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="colorOnPrimary">@color/colorAccent</item>
+    </style>
+
+    <style name="SettingsButtonColorDark" parent="Widget.MaterialComponents.Button">
+        <item name="materialThemeOverlay">@style/ButtonStyleTextColorDark</item>
+    </style>
+
+    <style name="ButtonStyleTextColorDark">
+        <item name="colorPrimary">@color/colorAccentLight</item>
+        <item name="colorOnPrimary">@color/colorAccentLight</item>
+    </style>
+<!-- Pentru background-ul alb: https://stackoverflow.com/questions/22320663/change-background-popupmenu-in-android -->
+<!--Ca să poată fi folosit cu android:theme, pentru a fi aplicat tuturor copiilor unui View trebuie să moștenească
+ dintr-o temă: parent="Theme.AppCompat.Light"-->
+
+    <!-- Pentru butoanele din activitatea edit
+    https://www.androiddesignpatterns.com/2016/08/coloring-buttons-with-themeoverlays-background-tints.html-->
+</resources>

@@ -1,0 +1,7 @@
+# Project exclude paths
+/.gradle/
+/app/build/
+/app/build/intermediates/javac/evalDebug/classes/
+/app/libs/Croller/build/
+/app/libs/Croller/build/intermediates/javac/debug/classes/
+/models/build/

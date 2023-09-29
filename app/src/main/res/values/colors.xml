@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--old primaryColor #2d6c55-->
+    <color name="primaryColor">#6C8C1C</color>
+    <color name="primaryDarkColor">#597317</color>
+    <!--old colorAccent #cb0600-->
+    <color name="colorAccent">#D91916</color>
+    <color name="colorAccentLight">#FF3633</color>
+    <color name="colorAccentLighter">#ff775f</color>
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="secondaryTextColor">#ffffff</color>
+
+    <color name="backgroundLightTheme">#faf9f6</color>
+    <color name="backgroundLighterTheme">#f5feff</color>
+    <color name="backgroundDarkTheme">#5f5f5f</color>
+    <color name="slotAndDetailHeaderDark">#1e1e1e</color>
+    <color name="detailHeaderBackgroundLight">#f0edec</color>
+
+    <color name="textOnDark">#FFFFFF</color>
+    <color name="white">#FFF</color>
+    <color name="white_trans">#99ffffff</color>
+    <color name="darkRecordingNotSelected">#ff424242</color>
+    <color name="darkRecordingSelected">#ff000000</color>
+    <color name="lightRecordingNotSelected">#fff</color>
+    <color name="lightRecordingSelected">#ddd</color>
+    <color name="green_dark">#52CC52</color>
+    <color name="green_light">#008000</color>
+    <color name="red">#E62222</color>
+    <color name="textOnLight">#a0000000</color>
+    <color name="selected_contact">#f0e2e7</color>
+    <color name="darkMenuBackground">#2e2e2e</color>
+    <color name="darkWindowBackground">#2e2e2e</color>
+    <color name="slotLight">@color/white</color>
+    <color name="slotDarkSelected">#3c3c3c</color>
+    <color name="slotLightSelected">#f0f0f0</color>
+    <color name="setupButton">#D94441</color>
+    <color name="darkBackground">#FF303030</color>
+</resources>

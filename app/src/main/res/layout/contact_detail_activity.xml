@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_height="?attr/actionBarSize"
+        android:layout_width="match_parent"
+        android:background="?attr/colorPrimary"
+        android:id="@+id/toolbar_detail"
+        android:elevation="2dp"
+        android:theme="@style/toolbar_theme"
+        >
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/back"
+            android:layout_marginEnd="20dp"
+            android:id="@+id/navigate_back"
+            android:layout_gravity="start"
+            android:background="@android:color/transparent"
+            />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/close"
+            android:layout_marginEnd="20dp"
+            android:id="@+id/close_select_mode"
+            android:layout_gravity="start"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            android:alpha="0"
+            />
+
+        <TextView
+            android:id="@+id/actionbar_title"
+            style="@style/toolbar_font"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLength="20"
+            />
+
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_more_vert_white_24"
+            android:layout_marginEnd="10dp"
+            android:background="@android:color/transparent"
+            android:id="@+id/contact_detail_selected_menu"
+            android:layout_gravity="end"
+            android:visibility="gone"
+            />
+
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/select_export"
+            android:background="@android:color/transparent"
+            android:id="@+id/actionbar_select_move"
+            android:layout_gravity="end"
+            android:layout_marginEnd="15dp"
+            android:visibility="gone"
+            android:alpha="0"
+            />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/select_all"
+            android:background="@android:color/transparent"
+            android:id="@+id/actionbar_select_all"
+            android:layout_gravity="end"
+            android:layout_marginEnd="15dp"
+            android:visibility="gone"
+            android:alpha="0"
+            />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/info"
+            android:background="@android:color/transparent"
+            android:id="@+id/actionbar_info"
+            android:layout_gravity="end"
+            android:layout_marginEnd="15dp"
+            android:visibility="gone"
+            android:alpha="0"
+            />
+
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_more_vert_white_24"
+            android:layout_marginEnd="10dp"
+            android:background="@android:color/transparent"
+            android:id="@+id/contact_detail_menu"
+            android:layout_gravity="end"
+           />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/edit"
+            android:background="@android:color/transparent"
+            android:id="@+id/edit_contact"
+            android:layout_gravity="end"
+            android:layout_marginEnd="15dp"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/call"
+            android:background="@android:color/transparent"
+            android:id="@+id/call_contact"
+            android:layout_gravity="end"
+            android:layout_marginEnd="15dp"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/filler">
+    </TextView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/filler"
+        android:id="@+id/contact_detail_fragment_container">
+
+    </FrameLayout>
+
+</RelativeLayout>

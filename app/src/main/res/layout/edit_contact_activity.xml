@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true"
+    android:scrollbars="vertical">
+
+<RelativeLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/edit_phone_number"
+    >
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_height="?attr/actionBarSize"
+        android:layout_width="match_parent"
+        android:background="?attr/colorPrimary"
+        app:titleTextColor="@color/textOnDark"
+        android:id="@+id/toolbar_edit"
+        android:elevation="2dp"
+        android:theme="@style/toolbar_theme"
+        app:titleTextAppearance="@style/toolbar_font"
+        app:title="Edit contact"
+        >
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/done"
+            android:layout_gravity="end"
+            android:background="@android:color/transparent"
+            android:layout_marginEnd="15dp"
+            android:id="@+id/edit_done"
+            />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true">
+
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/edit_phone_number_photo"
+            android:layout_width="@dimen/edit_image_size"
+            android:layout_height="@dimen/edit_image_size"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="40dp"
+            />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="6"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="60dp"
+        android:id="@+id/edit_name_parent"
+        android:baselineAligned="false">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="4"
+            android:weightSum="2"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/edit_contact_name"
+                android:textSize="15sp"
+                android:id="@+id/edit_name_label"
+                />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/edit_name"
+                android:inputType="text"
+                android:textSize="15sp"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:orientation="horizontal"
+       android:gravity="center_horizontal"
+       android:layout_marginTop="20dp"
+       android:id="@+id/edit_number_parent"
+       android:weightSum="6"
+       android:baselineAligned="false">
+
+       <LinearLayout
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:orientation="horizontal"
+           android:layout_weight="4"
+           android:weightSum="2"
+           >
+
+           <TextView
+               android:layout_width="0dp"
+               android:layout_height="wrap_content"
+               android:layout_weight="1"
+               android:text="@string/edit_phone_number"
+               android:textSize="15sp"
+               android:id="@+id/edit_number_label"
+               />
+
+           <androidx.appcompat.widget.AppCompatEditText
+               android:layout_width="0dp"
+               android:layout_height="wrap_content"
+               android:layout_weight="1"
+               android:id="@+id/edit_number"
+               android:inputType="phone"
+               android:textSize="15sp"
+               />
+       </LinearLayout>
+
+   </LinearLayout>
+<!-- După ce am pus scrollview, în landscape butoanele info_ok_change_name și cancel apăreau suprapuse peste drop-down listul cu phone type.
+Soluția a fost să adaug o margine ultimului linealayout orizontal.
+-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:id="@+id/edit_type_parent"
+        android:weightSum="6"
+        android:layout_marginBottom="20dp"
+        android:baselineAligned="false">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="4"
+            android:weightSum="2"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/edit_phone_type"
+                android:textSize="15sp"
+                android:id="@+id/edit_type_label"
+                />
+
+            <androidx.appcompat.widget.AppCompatSpinner
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:id="@+id/edit_types"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    </LinearLayout>
+
+
+</RelativeLayout>
+
+</ScrollView>

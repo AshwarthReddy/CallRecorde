@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.app.com/apk/res/app"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:key="enabled"
+        android:title="@string/enabled_title"
+        android:summary="@string/enabled_sum"
+        android:defaultValue="true"/>
+
+    <ListPreference
+        android:key="storage"
+        android:title="@string/prefs_storage_title"
+        android:entries="@array/storage_names"
+        android:entryValues="@array/storage_values"
+        android:defaultValue="private"
+        />
+
+    <Preference
+        android:key="public_storage_path"
+        android:title="@string/prefs_storage_path_title" />
+
+    <SwitchPreference
+        android:title="@string/prefs_speaker_title"
+        android:key="put_on_speaker"
+        android:summary="@string/prefs_speaker_sum"
+        android:defaultValue="false"/>
+
+    <ListPreference
+        android:title="@string/pref_audio_src_title"
+        android:key="source"
+        app:useSimpleSummaryProvider="true"
+        android:defaultValue="6"
+        android:entries="@array/source_names"
+        android:entryValues="@array/source_values"
+        />
+
+    <ListPreference
+        android:title="@string/prefs_format_title"
+        android:key="format"
+        android:entries="@array/format_names"
+        android:entryValues="@array/format_values"
+        app:useSimpleSummaryProvider="true"
+        android:defaultValue="aac_med"/>
+
+    <ListPreference
+       android:title="@string/prefs_mode_title"
+        android:key="mode"
+        android:entries="@array/mode_names"
+        android:entryValues="@array/mode_values"
+        android:defaultValue="mono" />
+
+
+    <ListPreference
+        android:title="@string/prefs_theme_title"
+        android:key="theme"
+        app:useSimpleSummaryProvider="true"
+        android:entries="@array/theme_options_names"
+        android:entryValues="@array/theme_options_values"
+        android:defaultValue="light_theme" />
+</androidx.preference.PreferenceScreen>
