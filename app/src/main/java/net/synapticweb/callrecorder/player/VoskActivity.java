@@ -35,6 +35,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
 
+import com.google.gson.JsonObject;
 import net.synapticweb.callrecorder.BaseActivity;
 import net.synapticweb.callrecorder.R;
 import net.synapticweb.callrecorder.contactdetail.ContactDetailFragment;
@@ -80,19 +81,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-/*
-url
-http://192.168.152.1:5001/health
-
-
-curl --location 'http://10.114.73.170:5001/processAudio' \
---header 'Content-Type: multipart/form-data' \
---form 'audioFiles=@"/Users/clinton/Desktop/MOM/temp copy.wav"'
-
-curl --location 'http://10.114.73.170:5001/health'
-
-
-* */
 public class VoskActivity extends BaseActivity implements
         RecognitionListener {
 
@@ -404,6 +392,7 @@ public class VoskActivity extends BaseActivity implements
             @Override
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 Toast.makeText(getApplicationContext(), response.message(), Toast.LENGTH_SHORT).show();
+                audio_result.setText("");
                 printValues(response.body());
             }
 
@@ -416,38 +405,13 @@ public class VoskActivity extends BaseActivity implements
     }
 
 
-    public void printValues(ServerResponse serverValue) {
+    public void printValues(ServerResponse responseValue) {
         try {
 
-            /*ServerResponse sr = new ServerResponse();
-            DataObject dto = new DataObject();
-            JSONObject jj = new JSONObject("{" +
-                    "      \"summary\": \"hello how are u\"," +
-                    "      \"Action_items\": \"call me at 7\"" +
-                    "    }");
-            dto.setMinutes(jj);
-            sr.setData(dto);
-            sr.setMessage("success");
-            sr.setStatus(true);
-            sr.setStatusCode(200);
-            sr.setSuccess(true);
-
-
-            {"statusCode": 200, "status": true, "message": "success", "data": {"minutes": {"Summary_Meeting": "Credit cards to be explained, bonus points are explained", "Action_Items": "1. Send brochures\n2. Schedule meeting at 2 pm\n3.Webiste link to be shared", "Minutes_of_Meeting": "Jade wants to apply for credit card on his salary and a card on his FD"}}}
-
-            */
-
-            ServerResponse sr = serverValue;
-
-            System.out.println(" ==--jsonobj" + sr.toString());
-
-            JSONObject jj = new JSONObject(serverValue.getData().getMinutes().toString());
-
-            System.out.println(" ==--jsonobj" + jj);
-            //loadJSONFromAsset()
-            //JSONObject obj = new JSONObject(jsonObject.toString());
-            //JSONObject dataObject = obj.getJSONObject("data");
-            JSONObject minutesObject = serverValue.getData().getMinutes(); //.getJSONObject("minutes");
+            ServerResponse sr = responseValue;
+           JSONObject jj = new JSONObject(String.valueOf(sr.getData()));
+           JSONObject obj = new JSONObject(jj.toString());
+            JSONObject minutesObject = obj.getJSONObject("minutes");
             for (Iterator<String> it = minutesObject.keys(); it.hasNext(); ) {
                 String key = it.next();
                 String value = minutesObject.getString(key);

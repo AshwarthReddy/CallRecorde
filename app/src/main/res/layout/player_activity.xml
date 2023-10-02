@@ -21,10 +21,9 @@ ascunse pe jumătate în susul ecranului.
 <ScrollView
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:layout_centerInParent="true"
-    android:paddingTop="20dp"
-    android:paddingBottom="30dp"
-    >
+    android:layout_below="@id/toolbar_player"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:id="@+id/player_root"
@@ -39,7 +38,6 @@ ascunse pe jumătate în susul ecranului.
             android:layout_height="wrap_content"
             android:textAlignment="center"
             android:id="@+id/recording_info"
-            android:layout_marginTop="15dp"
             android:layout_marginBottom="30dp"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
@@ -55,6 +53,7 @@ ascunse pe jumătate în susul ecranului.
             android:layout_gravity="center_horizontal|center_vertical"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
+            android:visibility="gone"
             android:layout_marginBottom="30dp"
             android:orientation="horizontal">
 
@@ -79,6 +78,7 @@ ascunse pe jumătate în susul ecranului.
             android:layout_height="140dp"
             android:layout_marginStart="50dp"
             android:layout_marginEnd="50dp"
+            android:visibility="gone"
             android:layout_marginBottom="30dp"
             android:background="@drawable/grid" />
 
@@ -143,22 +143,35 @@ ascunse pe jumătate în susul ecranului.
 
         </LinearLayout>
 
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+        android:orientation="vertical">
 
             <TextView
                 android:id="@+id/show_transcription"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:textAlignment="center"
+                android:textColor="@color/white"
+                android:padding="10dp"
                 android:text="Show Transcription"
+                android:background="@color/cardview_dark_background"
                 android:textSize="15sp" />
 
+            <TextView
+                    android:id="@+id/audio_result"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:gravity="bottom"
+                    android:scrollbars="vertical"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
         </LinearLayout>
+
     </LinearLayout>
 
 </ScrollView>

@@ -15,11 +15,4 @@ public class DataObject {
     public void setMinutes(JSONObject minutes) {
         this.minutes = minutes;
     }
-
-    @Override
-    public String toString() {
-        return " {" +
-                "minutes=" + minutes +
-                '}';
-    }
 }

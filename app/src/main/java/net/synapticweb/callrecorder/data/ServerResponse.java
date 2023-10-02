@@ -2,6 +2,7 @@ package net.synapticweb.callrecorder.data;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 import org.json.JSONException;
@@ -19,14 +20,13 @@ public class ServerResponse {
     String message;
 
     @SerializedName("data")
-     DataObject data;
+    JsonObject data;
 
-
-    public DataObject getData() {
+    public JsonObject getData() {
         return data;
     }
 
-    public void setData(DataObject data) {
+    public void setData(JsonObject data) {
         this.data = data;
     }
 

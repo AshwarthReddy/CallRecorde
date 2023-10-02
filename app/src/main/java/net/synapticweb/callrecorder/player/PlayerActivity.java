@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import net.synapticweb.callrecorder.CrLog;
 import net.synapticweb.callrecorder.R;
 import net.synapticweb.callrecorder.BaseActivity;
@@ -37,6 +38,22 @@ import androidx.fragment.app.Fragment;
 
 import com.chibde.visualizer.LineBarVisualizer;
 import com.sdsmdg.harjot.crollerTest.Croller;
+import net.synapticweb.callrecorder.data.ServerResponse;
+import net.synapticweb.callrecorder.retrofit.APIClient;
+import net.synapticweb.callrecorder.retrofit.APIInterface;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import org.json.JSONException;
+import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Iterator;
 
 public class PlayerActivity extends BaseActivity {
     AudioPlayer player;
@@ -44,7 +61,7 @@ public class PlayerActivity extends BaseActivity {
     ImageButton playPause, resetPlaying;
     TextView recordingInfo;
     SeekBar playSeekBar;
-    TextView playedTime, totalTime, show_transcription;
+    TextView playedTime, totalTime, show_transcription, audio_result;
     boolean userIsSeeking = false;
     LineBarVisualizer visualizer;
     AudioManager audioManager;
@@ -95,13 +112,21 @@ public class PlayerActivity extends BaseActivity {
         playedTime = findViewById(R.id.test_play_time_played);
         totalTime = findViewById(R.id.test_play_total_time);
         show_transcription = findViewById(R.id.show_transcription);
+        audio_result = findViewById(R.id.audio_result);
 
         show_transcription.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent playIntent = new Intent(PlayerActivity.this, VoskActivity.class);
+                try {
+                    sendFile(recording.getPath());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+                /*Intent playIntent = new Intent(PlayerActivity.this, VoskActivity.class);
                 playIntent.putExtra(RECORDING_EXTRA, recording);
-                startActivity(playIntent);
+                startActivity(playIntent);*/
             }
         });
 
@@ -296,4 +321,55 @@ public class PlayerActivity extends BaseActivity {
                 player.setGain(gainControl.getProgress());
         }
     }
+
+
+    public void sendFile(String mediaPath) throws IOException, URISyntaxException {
+        // Map is used to multipart the file using okhttp3.RequestBody
+        //etResources().getAssets().open(  "10001-90210-01803.wav").toString()
+        // File file = new File(getResources().getAssets().open("10001-90210-01803.wav").toString());
+        System.out.println("-=====--" + mediaPath);
+        File file = new File(mediaPath);
+
+        // Parsing any Media type file
+        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part fileToUpload = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
+        RequestBody filename = RequestBody.create(MediaType.parse("*/*"), file.getName());
+
+        APIInterface getResponse = APIClient.getClient().create(APIInterface.class);
+        Call<ServerResponse> call = getResponse.uploadFile(fileToUpload, filename);
+        call.enqueue(new Callback<ServerResponse>() {
+            @Override
+            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                Toast.makeText(getApplicationContext(), response.message(), Toast.LENGTH_SHORT).show();
+                audio_result.setText("");
+                printValues(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+
+    public void printValues(ServerResponse responseValue) {
+        try {
+            ServerResponse sr = responseValue;
+            JSONObject jj = new JSONObject(String.valueOf(sr.getData()));
+            JSONObject obj = new JSONObject(jj.toString());
+            JSONObject minutesObject = obj.getJSONObject("minutes");
+            for (Iterator<String> it = minutesObject.keys(); it.hasNext(); ) {
+                String key = it.next();
+                String value = minutesObject.getString(key);
+                System.out.println(key + " : " + value);
+                audio_result.append(key.replace("_" , " ") + " : " + value + " \n\n");
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
