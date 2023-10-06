@@ -186,9 +186,11 @@ public class PlayerActivity extends BaseActivity {
         );
 
         recordingInfo = findViewById(R.id.recording_info);
-        recordingInfo.setText(String.format(getResources().getString(R.string.recording_info),
-                recording.getName(), recording.getHumanReadingFormat(getApplicationContext())));
+        recordingInfo.setText(recording.getName());
 
+
+        //recordingInfo.setText(String.format(getResources().getString(R.string.recording_info),
+          //      recording.getName(), recording.getHumanReadingFormat(getApplicationContext())));
 //        Log.wtf(TAG, "Available width: " + getResources().getDisplayMetrics().widthPixels);
 //        Log.wtf(TAG, "Density: " + getResources().getDisplayMetrics().density);
 //        Log.wtf(TAG, "Density dpi: " + getResources().getDisplayMetrics().densityDpi);
@@ -342,6 +344,7 @@ public class PlayerActivity extends BaseActivity {
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 Toast.makeText(getApplicationContext(), response.message(), Toast.LENGTH_SHORT).show();
                 audio_result.setText("");
+                audio_result.setVisibility(View.GONE);
                 printValues(response.body());
             }
 
@@ -364,12 +367,17 @@ public class PlayerActivity extends BaseActivity {
                 String key = it.next();
                 String value = minutesObject.getString(key);
                 System.out.println(key + " : " + value);
+                audio_result.setVisibility(View.VISIBLE);
                 audio_result.append(key.replace("_" , " ") + " : " + value + " \n\n");
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void loadDefaultValues() {
+
     }
 
 }
