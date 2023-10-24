@@ -16,13 +16,13 @@ public class APIClient {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(10 , TimeUnit.MINUTES)
-                .readTimeout(10 , TimeUnit.MINUTES)
-                .writeTimeout(10 ,TimeUnit.MINUTES)
+                .connectTimeout(10000 , TimeUnit.MINUTES)
+                .readTimeout(10000 , TimeUnit.MINUTES)
+                .writeTimeout(10000 ,TimeUnit.MINUTES)
                 .addInterceptor(interceptor).build();
 
         retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:5000/")
+                .baseUrl("http://10.0.2.2:5000/") //http://172.20.10.4:5001/
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();

@@ -1,188 +1,362 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A fost necesar să îl bag într-un relativelayout în care să centrez scrollview-ul pentru că altfel,
-dacă foloseam layout_gravity = center_vertical pentru centrare în player_root cele 2 controale rotunde apăreau
-ascunse pe jumătate în susul ecranului.
--->
-<RelativeLayout android:layout_height="match_parent"
-    android:layout_width="match_parent"
-                android:background="@color/white"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:background="@color/white">
 
     <androidx.appcompat.widget.Toolbar
-        android:layout_height="?attr/actionBarSize"
-        android:layout_width="match_parent"
-        android:background="?attr/colorPrimary"
-        android:id="@+id/toolbar_player"
-        android:elevation="2dp"
-        android:theme="@style/toolbar_theme"
-        app:titleTextAppearance="@style/toolbar_font"
-        />
-
-<ScrollView
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
-    android:layout_below="@id/toolbar_player"
-    android:paddingTop="10dp"
-    android:background="@color/backgroundLightTheme"
-    android:paddingBottom="1dp">
+            android:layout_height="?attr/actionBarSize"
+            android:layout_width="match_parent"
+            android:background="?attr/colorPrimary"
+            android:id="@+id/toolbar_player"
+            android:elevation="2dp"
+            android:theme="@style/toolbar_theme"
+            android:visibility="gone"
+            app:titleTextAppearance="@style/toolbar_font"/>
 
     <LinearLayout
-        android:id="@+id/player_root"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:visibility="gone"
-            android:layout_marginBottom="30dp"
-            android:orientation="horizontal">
-
-            <com.sdsmdg.harjot.crollerTest.Croller
-                android:id="@+id/volume_control"
-                style="?attr/playerControlStyle"
-                android:layout_marginEnd="15dp"
-                app:label="@string/volume"
-            />
-
-            <com.sdsmdg.harjot.crollerTest.Croller
-                android:id="@+id/gain_control"
-                style="?attr/playerControlStyle"
-                android:layout_marginStart="15dp"
-                app:label="@string/gain"/>
-
-        </LinearLayout>
-
-        <com.chibde.visualizer.LineBarVisualizer
-            android:id="@+id/visualizer"
-            android:layout_width="wrap_content"
-            android:layout_height="140dp"
-            android:layout_marginStart="50dp"
-            android:layout_marginEnd="50dp"
-            android:visibility="gone"
-            android:layout_marginBottom="30dp"
-            android:background="@drawable/grid" />
-
-        <LinearLayout
-            android:id="@+id/play_buttons"
+            android:id="@+id/header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:padding="20dp"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/test_player_play_pause"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="5dp" />
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/abc_vector_test"
+                android:tint="@color/darkRecordingSelected"
+                android:contentDescription="description"/>
 
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
 
-                <TextView
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Audio Player"
+                android:layout_gravity="center"
+                android:textStyle="bold"
+                android:fontFamily="@font/opensansvariable"
+                android:textColor="@color/darkRecordingSelected"
+                android:gravity="center"/>
+
+    </LinearLayout>
+
+    <View
+            android:id="@+id/grey_border"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_below="@id/header"
+            android:background="@color/lightRecordingSelected"/>
+
+    <ScrollView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_below="@id/grey_border"
+            android:paddingTop="0dp"
+            android:paddingBottom="1dp">
+
+        <LinearLayout
+                android:id="@+id/player_root"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:padding="10dp"
+                          android:orientation="vertical">
+
+                <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/recording_info"
-                        android:textSize="14sp"
-                        android:layout_marginStart="12dp"
-                        android:lineSpacingMultiplier="1.1"
-                        android:text="Khaja Zamiuddin audio file.aar"
-                        android:textColor="#828282"/>
+                        android:layout_gravity="center_horizontal|center_vertical"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:visibility="gone"
+                        android:layout_marginBottom="30dp"
+                        android:orientation="horizontal">
 
-                <SeekBar
-                        android:id="@+id/play_seekbar"
+                    <com.sdsmdg.harjot.crollerTest.Croller
+                            android:id="@+id/volume_control"
+                            style="?attr/playerControlStyle"
+                            android:layout_marginEnd="15dp"
+                            app:label="@string/volume"
+                    />
+
+                    <com.sdsmdg.harjot.crollerTest.Croller
+                            android:id="@+id/gain_control"
+                            style="?attr/playerControlStyle"
+                            android:layout_marginStart="15dp"
+                            app:label="@string/gain"/>
+
+                </LinearLayout>
+
+                <com.chibde.visualizer.LineBarVisualizer
+                        android:id="@+id/visualizer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="140dp"
+                        android:layout_marginStart="50dp"
+                        android:layout_marginEnd="50dp"
+                        android:visibility="visible"
+                        android:layout_marginBottom="30dp"
+                        android:background="@drawable/grid"/>
+
+
+                <RelativeLayout
+                        android:id="@+id/play_buttons"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    <ImageView
+                            android:id="@+id/circle_blue"
+                            android:layout_width="12sp"
+                            android:layout_height="12sp"
+                            android:layout_alignParentStart="true"
+                            android:layout_marginTop="3dp"
+                            android:src="@drawable/circle"/>
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/recording_info"
+                            android:textSize="18sp"
+                            android:layout_marginStart="12dp"
+                            android:layout_toEndOf="@id/circle_blue"
+                            android:layout_toStartOf="@id/upload"
+                            android:fontFamily="@font/opensansvariable"
+                            android:text="khaja Zamiuddin.aar"
+                            android:lineSpacingMultiplier="1.1"
+                            android:textStyle="bold"
+                            android:textColor="@color/darkRecordingSelected"/>
+
+                    <ImageView
+                            android:id="@+id/upload"
+                            android:layout_width="20sp"
+                            android:layout_height="20sp"
+                            android:layout_toStartOf="@id/info"
+                            android:layout_marginEnd="20dp"
+                            android:layout_marginTop="5dp"
+                            android:background="@drawable/upload"
+                            android:backgroundTint="#4d79ff"/>
+
+                    <TextView
+                            android:id="@+id/info"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_alignParentEnd="true"
+                            android:background="@drawable/info"
+                            android:backgroundTint="#4d79ff"/>
+
+                </RelativeLayout>
+
+                <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="1dp"
-                        android:layout_weight="10" />
+                        android:orientation="horizontal"
+                        android:layout_marginStart="12dp"
+                        android:paddingBottom="2dp">
+
+                    <SeekBar
+                            android:id="@+id/play_seekbar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="1dp"/>
+
+                </LinearLayout>
+
+                <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginEnd="15dp"
+                        android:layout_marginStart="12dp"
+                        android:paddingBottom="10dp">
+
+                    <TextView
+                            android:id="@+id/test_play_time_played"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="7dp"
+                            android:text="00:23"
+                            android:fontFamily="@font/opensansvariable"
+                            android:layout_alignParentStart="true"
+                            android:textSize="13sp"/>
+
+                    <TextView
+                            android:id="@+id/slash"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="7dp"
+                            android:text="/ "
+                            android:visibility="gone"
+                            android:textSize="13sp"/>
+
+                    <TextView
+                            android:id="@+id/test_play_total_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="7dp"
+                            android:layout_gravity="end"
+                            android:fontFamily="@font/opensansvariable"
+                            android:gravity="end"
+                            android:layout_alignParentEnd="true"
+                            android:text="00:23"
+                            android:textSize="13sp"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginStart="12dp"
+                        android:paddingBottom="10dp">
+
+                    <ImageButton
+                            android:id="@+id/test_player_play_pause"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_margin="5dp"/>
+
+
+                    <ImageButton
+                            android:id="@+id/speaker"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_toLeftOf="@id/call"
+                            android:background="@drawable/speaker"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="5dp"
+                            android:layout_marginEnd="5dp"
+                            android:layout_marginBottom="5dp"/>
+
+                    <ImageButton
+                            android:id="@+id/call"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_toLeftOf="@id/delete"
+                            android:background="@drawable/calls"
+                            android:layout_margin="5dp"
+                    />
+
+                    <ImageButton
+                            android:id="@+id/delete"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_alignParentEnd="true"
+                            android:background="@drawable/delete"
+                            android:layout_margin="5dp"/>
+
+                    <ImageButton
+                            android:id="@+id/test_player_reset"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_marginStart="15dp"
+                            android:visibility="gone"
+                            android:background="@drawable/player_stop"
+                    />
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="vertical">
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                    <TextView
+                            android:id="@+id/show_transcription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#525252"
+                            android:text="Transcription"
+                            android:fontFamily="@font/opensansvariable"
+                            android:layout_gravity="start"
+                            android:drawablePadding="10dp"
+                            android:paddingStart="15dp"
+                            android:paddingBottom="4dp"
+                            android:textStyle="bold"
+                            android:textSize="18sp"/>
+
+                    <TextView
+                            android:id="@+id/audio_result"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginEnd="15dp"
+                            android:lineSpacingExtra="3sp"
+                            android:gravity="bottom"
+                            android:scrollbars="vertical"
+                            android:fontFamily="@font/opensansvariable"
+                            android:textColor="#797979"
+                            android:textStyle="normal"
+                            android:textSize="16sp" />
+
+
+                    <LinearLayout
+                            android:id="@+id/bottom_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginBottom="15dp"
+                            android:visibility="gone"
+                            android:orientation="horizontal">
+
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:scrollbars="vertical"
+                                android:textColor="#414141"
+                                android:fontFamily="@font/opensansvariable"
+                                android:textSize="14sp"
+                                android:text="Was this transcription "
+                                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:scrollbars="vertical"
+                                android:textColor="#4d79ff"
+                                android:textSize="14sp"
+                                android:text="useful "
+                                android:fontFamily="@font/opensansvariable"
+                                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:scrollbars="vertical"
+                                android:textColor="#414141"
+                                android:textSize="14sp"
+                                android:fontFamily="@font/opensansvariable"
+                                android:text="or "
+                                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                        <TextView
+                                android:id="@+id/audio_extra"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:scrollbars="vertical"
+                                android:textColor="#4d79ff"
+                                android:textSize="14sp"
+                                android:fontFamily="@font/opensansvariable"
+                                android:text="not useful?"
+                                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                    </LinearLayout>
+
+
+                </LinearLayout>
 
             </LinearLayout>
 
 
-            <ImageButton
-                android:id="@+id/test_player_reset"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="15dp"
-                android:visibility="gone"
-                android:background="@drawable/player_stop" />
-
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-             android:layout_marginEnd="15dp"
-            android:gravity="right">
-
-            <TextView
-                android:id="@+id/test_play_time_played"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="7dp"
-                android:text="00:23"
-                android:textSize="13sp" />
-
-            <TextView
-                    android:id="@+id/slash"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="7dp"
-                   android:text="/ "
-                   android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/test_play_total_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="7dp"
-                android:text="00:23"
-               android:textSize="13sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-        android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/show_transcription"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/slotAndDetailHeaderDark"
-                android:text="Show Transcription"
-                android:drawableRight="@drawable/abc_vector_test"
-                android:drawableTint="#4d79ff"
-                android:drawablePadding="10dp"
-                android:textSize="15sp" />
-
-            <TextView
-                    android:id="@+id/audio_result"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
-                    android:layout_marginTop="8dp"
-                    android:gravity="bottom"
-                    android:scrollbars="vertical"
-                    android:textColor="@color/slotAndDetailHeaderDark"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</ScrollView>
+    </ScrollView>
 
 </RelativeLayout>

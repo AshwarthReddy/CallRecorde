@@ -22,6 +22,9 @@ public interface APIInterface {
             @Part MultipartBody.Part file,
             @Part("audioFiles") RequestBody name);
 
+    @GET("health")
+    Call<ServerResponse> checkAPIworking1();
+
      @GET("health")
     Call<ServerResponse> checkAPIworking();
 

@@ -15,14 +15,12 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageButton;
-import android.widget.SeekBar;
-import android.widget.TextView;
+import android.widget.*;
 
-import android.widget.Toast;
 import net.synapticweb.callrecorder.CrLog;
 import net.synapticweb.callrecorder.R;
 import net.synapticweb.callrecorder.BaseActivity;
@@ -62,6 +60,7 @@ public class PlayerActivity extends BaseActivity {
     TextView recordingInfo;
     SeekBar playSeekBar;
     TextView playedTime, totalTime, show_transcription, audio_result;
+    LinearLayout bottom_text;
     boolean userIsSeeking = false;
     LineBarVisualizer visualizer;
     AudioManager audioManager;
@@ -113,6 +112,7 @@ public class PlayerActivity extends BaseActivity {
         totalTime = findViewById(R.id.test_play_total_time);
         show_transcription = findViewById(R.id.show_transcription);
         audio_result = findViewById(R.id.audio_result);
+        bottom_text = findViewById(R.id.bottom_text);
 
         show_transcription.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -345,6 +345,8 @@ public class PlayerActivity extends BaseActivity {
                 Toast.makeText(getApplicationContext(), response.message(), Toast.LENGTH_SHORT).show();
                 audio_result.setText("");
                 audio_result.setVisibility(View.GONE);
+                bottom_text.setVisibility(View.GONE);
+                System.out.println(response.body());
                 printValues(response.body());
             }
 
@@ -360,15 +362,25 @@ public class PlayerActivity extends BaseActivity {
     public void printValues(ServerResponse responseValue) {
         try {
             ServerResponse sr = responseValue;
-            JSONObject jj = new JSONObject(String.valueOf(sr.getData()));
-            JSONObject obj = new JSONObject(jj.toString());
-            JSONObject minutesObject = obj.getJSONObject("minutes");
-            for (Iterator<String> it = minutesObject.keys(); it.hasNext(); ) {
+            JSONObject jj1 = new JSONObject(String.valueOf(sr.getData()));
+            JSONObject obj = new JSONObject(jj1.toString());
+            JSONObject jj = obj.getJSONObject("minutes");
+
+            for (Iterator<String> it = jj.keys(); it.hasNext(); ) {
                 String key = it.next();
-                String value = minutesObject.getString(key);
+                String value = jj.getString(key);
+                String[] finalValues = value.split("(?=[0-9])");
+                StringBuilder sb = new StringBuilder();
+                for(String part : finalValues) {
+                    if(part.matches(".*\\d+.*")) {
+                        sb.append("<br>");
+                    }
+                    sb.append(part);
+                }
                 System.out.println(key + " : " + value);
                 audio_result.setVisibility(View.VISIBLE);
-                audio_result.append(key.replace("_" , " ") + " : " + value + " \n\n");
+                bottom_text.setVisibility(View.VISIBLE);
+                audio_result.append(Html.fromHtml("<b>" + getCapsSentences(key.replace("_" , " ")) + " : </b> <br>" + sb + "<br><br>"));
             }
 
         } catch (JSONException e) {
@@ -378,6 +390,22 @@ public class PlayerActivity extends BaseActivity {
 
     public void loadDefaultValues() {
 
+    }
+
+
+    private String getCapsSentences(String tagName) {
+        String[] splits = tagName.toLowerCase().split(" ");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < splits.length; i++) {
+            String eachWord = splits[i];
+            if (i > 0 && !eachWord.isEmpty()) {
+                sb.append(" ");
+            }
+            String cap = eachWord.substring(0, 1).toUpperCase()
+                    + eachWord.substring(1);
+            sb.append(cap);
+        }
+        return sb.toString();
     }
 
 }
