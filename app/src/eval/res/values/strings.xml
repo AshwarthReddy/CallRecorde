@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">SW Call Recorder (evaluation)</string>
-    <string name="accessibility_service_description">SW Call Recorder</string>
-    <string name="accessibility_service_label">SW Call Recorder</string>
+    <string name="app_name">Call Transcription </string>
+    <string name="accessibility_service_description">Call Transcription</string>
+    <string name="accessibility_service_label">Call Transcription</string>
 
     <string name="recognize_file">Recognize File</string>
     <string name="recognize_microphone">Recognize Microphone</string>

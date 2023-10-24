@@ -35,4 +35,5 @@
     <color name="slotLightSelected">#f0f0f0</color>
     <color name="setupButton">#D94441</color>
     <color name="darkBackground">#FF303030</color>
+    <color name="disable">#56565A</color>
 </resources>

@@ -118,6 +118,10 @@ public class PlayerActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 try {
+                    audio_result.setText("Waiting for transcription...");
+                    show_transcription.setBackground(getApplicationContext().getDrawable(R.drawable.rounded_corner_disable));
+                    show_transcription.setPadding(50, 30, 50 ,30);
+                    show_transcription.setEnabled(false);
                     sendFile(recording.getPath());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -343,8 +347,8 @@ public class PlayerActivity extends BaseActivity {
             @Override
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 Toast.makeText(getApplicationContext(), response.message(), Toast.LENGTH_SHORT).show();
-                audio_result.setText("");
-                audio_result.setVisibility(View.GONE);
+                 audio_result.setText("");
+                //audio_result.setVisibility(View.GONE);
                 bottom_text.setVisibility(View.GONE);
                 System.out.println(response.body());
                 printValues(response.body());
@@ -362,9 +366,9 @@ public class PlayerActivity extends BaseActivity {
     public void printValues(ServerResponse responseValue) {
         try {
             ServerResponse sr = responseValue;
-            JSONObject jj1 = new JSONObject(String.valueOf(sr.getData()));
-            JSONObject obj = new JSONObject(jj1.toString());
-            JSONObject jj = obj.getJSONObject("minutes");
+            JSONObject jj = new JSONObject(String.valueOf(sr.getData()));
+           // JSONObject obj = new JSONObject(jj1.toString());
+           // JSONObject jj = obj.getJSONObject("minutes");
 
             for (Iterator<String> it = jj.keys(); it.hasNext(); ) {
                 String key = it.next();
@@ -380,7 +384,8 @@ public class PlayerActivity extends BaseActivity {
                 System.out.println(key + " : " + value);
                 audio_result.setVisibility(View.VISIBLE);
                 bottom_text.setVisibility(View.VISIBLE);
-                audio_result.append(Html.fromHtml("<b>" + getCapsSentences(key.replace("_" , " ")) + " : </b> <br>" + sb + "<br><br>"));
+                String keyValue = "<b>" + getCapsSentences(key.replace("_" , " ")) + "</b> ";
+                audio_result.append(Html.fromHtml("<br>" + keyValue + " : <br>" + sb + "<br><br>"));
             }
 
         } catch (JSONException e) {

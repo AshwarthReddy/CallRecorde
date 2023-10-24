@@ -3,7 +3,7 @@
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorAccent">@color/colorAccent</item>
-
+        <item name="fontFamily">@font/opensansvariable</item>
         <item name="android:windowBackground">@color/backgroundLightTheme</item>
         <item name="android:textColorPrimary">@color/text_on_light</item>
         <!-- https://stackoverflow.com/questions/17769198/android-change-color-of-disabled-text-using-theme-style-->
@@ -120,10 +120,12 @@ https://stackoverflow.com/questions/30487616/android-overriding-a-style-per-them
     </style>
     
     <style name="toolbar_font" parent="@style/Base.TextAppearance.AppCompat.Title">
+        <item name="fontFamily">@font/opensansvariable</item>
         <item name="android:textSize">15sp</item>
     </style>
 
     <style name="toolbar_font_contacts" parent="@style/Base.TextAppearance.AppCompat.Title">
+        <item name="fontFamily">@font/opensansvariable</item>
         <item name="android:textSize">13sp</item>
     </style>
 

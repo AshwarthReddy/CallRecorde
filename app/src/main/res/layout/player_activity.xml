@@ -33,7 +33,7 @@
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Audio Player"
+                android:text="Listen"
                 android:layout_gravity="center"
                 android:textStyle="bold"
                 android:fontFamily="@font/opensansvariable"
@@ -94,10 +94,10 @@
 
                 <com.chibde.visualizer.LineBarVisualizer
                         android:id="@+id/visualizer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="140dp"
-                        android:layout_marginStart="50dp"
-                        android:layout_marginEnd="50dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="400dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
                         android:visibility="visible"
                         android:layout_marginBottom="30dp"
                         android:background="@drawable/grid"/>
@@ -270,35 +270,40 @@
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
                         android:orientation="vertical">
 
                     <TextView
                             android:id="@+id/show_transcription"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#525252"
+                            android:textColor="#FFFFFF"
                             android:text="Transcription"
                             android:fontFamily="@font/opensansvariable"
-                            android:layout_gravity="start"
+                            android:layout_gravity="center_horizontal"
                             android:drawablePadding="10dp"
-                            android:paddingStart="15dp"
-                            android:paddingBottom="4dp"
+                            android:background="@drawable/rounded_corner"
+                            android:paddingStart="25dp"
+                            android:paddingEnd="25dp"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:gravity="center_horizontal"
                             android:textStyle="bold"
-                            android:textSize="18sp"/>
+                            android:textSize="16sp"/>
 
                     <TextView
                             android:id="@+id/audio_result"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
                             android:layout_marginStart="15dp"
                             android:layout_marginEnd="15dp"
-                            android:lineSpacingExtra="3sp"
+                            android:lineSpacingExtra="2sp"
                             android:gravity="bottom"
-                            android:scrollbars="vertical"
-                            android:fontFamily="@font/opensansvariable"
-                            android:textColor="#797979"
                             android:textStyle="normal"
-                            android:textSize="16sp" />
+                            android:fontFamily="@font/opensansvariable"
+                            android:textColor="#999999"
+                            android:textSize="14sp" />
 
 
                     <LinearLayout
@@ -314,7 +319,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:scrollbars="vertical"
-                                android:textColor="#414141"
+                                android:textColor="#999999"
                                 android:fontFamily="@font/opensansvariable"
                                 android:textSize="14sp"
                                 android:text="Was this transcription "
@@ -332,7 +337,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:scrollbars="vertical"
-                                android:textColor="#414141"
+                                android:textColor="#999999"
                                 android:textSize="14sp"
                                 android:fontFamily="@font/opensansvariable"
                                 android:text="or "
@@ -345,7 +350,7 @@
                                 android:textColor="#4d79ff"
                                 android:textSize="14sp"
                                 android:fontFamily="@font/opensansvariable"
-                                android:text="not useful?"
+                                android:text="not useful ?"
                                 android:textAppearance="?android:attr/textAppearanceMedium"/>
                     </LinearLayout>
 
