@@ -2,13 +2,13 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
   <item>
     <shape android:shape="oval">
-      <solid android:color="@color/inactiveGradientColor"/>
+      <solid android:color="#F00"/>
     </shape>
   </item>
   <item
           android:drawable="@drawable/delete_new"
-          android:bottom="10dp"
-          android:left="10dp"
-          android:right="10dp"
-          android:top="10dp"/>
+          android:bottom="8dp"
+          android:left="8dp"
+          android:right="8dp"
+          android:top="8dp"/>
 </layer-list>
