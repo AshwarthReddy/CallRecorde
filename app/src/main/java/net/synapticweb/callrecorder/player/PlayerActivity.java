@@ -51,7 +51,11 @@ import retrofit2.Response;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PlayerActivity extends BaseActivity {
     AudioPlayer player;
@@ -60,6 +64,7 @@ public class PlayerActivity extends BaseActivity {
     TextView recordingInfo;
     SeekBar playSeekBar;
     TextView playedTime, totalTime, show_transcription, audio_result;
+    ImageView go_back;
     LinearLayout bottom_text;
     boolean userIsSeeking = false;
     LineBarVisualizer visualizer;
@@ -113,6 +118,7 @@ public class PlayerActivity extends BaseActivity {
         show_transcription = findViewById(R.id.show_transcription);
         audio_result = findViewById(R.id.audio_result);
         bottom_text = findViewById(R.id.bottom_text);
+        go_back = findViewById(R.id.go_back);
 
         show_transcription.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,6 +159,8 @@ public class PlayerActivity extends BaseActivity {
                     playPause.setBackground(getResources().getDrawable(R.drawable.player_play));
                 player.reset();
         });
+
+        go_back.setOnClickListener(view -> onBackPressed());
 
         playSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int userSelectedPosition = 0;
@@ -347,7 +355,7 @@ public class PlayerActivity extends BaseActivity {
             @Override
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 Toast.makeText(getApplicationContext(), response.message(), Toast.LENGTH_SHORT).show();
-                 audio_result.setText("");
+                 //audio_result.setText("");
                 //audio_result.setVisibility(View.GONE);
                 bottom_text.setVisibility(View.GONE);
                 System.out.println(response.body());
@@ -365,9 +373,10 @@ public class PlayerActivity extends BaseActivity {
 
     public void printValues(ServerResponse responseValue) {
         try {
+            audio_result.setText("");
             ServerResponse sr = responseValue;
             JSONObject jj = new JSONObject(String.valueOf(sr.getData()));
-           // JSONObject obj = new JSONObject(jj1.toString());
+            //JSONObject obj = new JSONObject(jj1.toString());
            // JSONObject jj = obj.getJSONObject("minutes");
 
             for (Iterator<String> it = jj.keys(); it.hasNext(); ) {
@@ -385,7 +394,10 @@ public class PlayerActivity extends BaseActivity {
                 audio_result.setVisibility(View.VISIBLE);
                 bottom_text.setVisibility(View.VISIBLE);
                 String keyValue = "<b>" + getCapsSentences(key.replace("_" , " ")) + "</b> ";
-                audio_result.append(Html.fromHtml("<br>" + keyValue + " : <br>" + sb + "<br><br>"));
+                audio_result.append(Html.fromHtml("<br>" + keyValue + " : <br>" +  sb + "<br>"));
+                show_transcription.setBackground(getApplicationContext().getDrawable(R.drawable.rounded_corner));
+                show_transcription.setPadding(50, 30, 50 ,30);
+                show_transcription.setEnabled(true);
             }
 
         } catch (JSONException e) {
@@ -412,5 +424,4 @@ public class PlayerActivity extends BaseActivity {
         }
         return sb.toString();
     }
-
 }

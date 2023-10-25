@@ -23,6 +23,7 @@
             android:orientation="horizontal">
 
         <ImageView
+                android:id="@+id/go_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/abc_vector_test"
@@ -95,7 +96,7 @@
                 <com.chibde.visualizer.LineBarVisualizer
                         android:id="@+id/visualizer"
                         android:layout_width="match_parent"
-                        android:layout_height="400dp"
+                        android:layout_height="300dp"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
                         android:visibility="visible"
@@ -132,21 +133,21 @@
 
                     <ImageView
                             android:id="@+id/upload"
-                            android:layout_width="20sp"
-                            android:layout_height="20sp"
+                            android:layout_width="25sp"
+                            android:layout_height="25sp"
                             android:layout_toStartOf="@id/info"
-                            android:layout_marginEnd="20dp"
-                            android:layout_marginTop="5dp"
-                            android:background="@drawable/upload"
-                            android:backgroundTint="#4d79ff"/>
+                            android:layout_marginEnd="15dp"
+                            android:backgroundTint="#4d79ff"
+                            android:background="@drawable/upload_new"/>
 
                     <TextView
                             android:id="@+id/info"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
                             android:layout_alignParentEnd="true"
-                            android:background="@drawable/info"
-                            android:backgroundTint="#4d79ff"/>
+                            android:layout_marginEnd="15dp"
+                            android:backgroundTint="#4d79ff"
+                            android:background="@drawable/info_new"/>
 
                 </RelativeLayout>
 
@@ -227,7 +228,7 @@
                             android:layout_width="35dp"
                             android:layout_height="35dp"
                             android:layout_toLeftOf="@id/call"
-                            android:background="@drawable/speaker"
+                            android:background="@drawable/circle_fill_volume"
                             android:layout_marginTop="5dp"
                             android:layout_marginStart="5dp"
                             android:layout_marginEnd="5dp"
@@ -238,17 +239,18 @@
                             android:layout_width="35dp"
                             android:layout_height="35dp"
                             android:layout_toLeftOf="@id/delete"
-                            android:background="@drawable/calls"
-                            android:layout_margin="5dp"
-                    />
+                            android:background="@drawable/circle_fill_calls"
+                            android:layout_marginTop="5dp" android:layout_marginStart="5dp"
+                            android:layout_marginEnd="5dp" android:layout_marginBottom="5dp"/>
 
                     <ImageButton
                             android:id="@+id/delete"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
                             android:layout_alignParentEnd="true"
-                            android:background="@drawable/delete"
-                            android:layout_margin="5dp"/>
+                            android:background="@drawable/circle_fill_delete"
+                            android:layout_marginTop="5dp" android:layout_marginStart="5dp"
+                            android:layout_marginEnd="5dp" android:layout_marginBottom="5dp"/>
 
                     <ImageButton
                             android:id="@+id/test_player_reset"
