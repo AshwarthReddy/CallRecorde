@@ -386,11 +386,12 @@ public class PlayerActivity extends BaseActivity {
                 StringBuilder sb = new StringBuilder();
                 for(String part : finalValues) {
                     if(part.matches(".*\\d+.*")) {
+                        System.out.println("part----" + part);
                         sb.append("<br>");
                     }
                     sb.append(part);
                 }
-                System.out.println(key + " : " + value);
+                //System.out.println(key + " : " + value);
                 audio_result.setVisibility(View.VISIBLE);
                 bottom_text.setVisibility(View.VISIBLE);
                 String keyValue = "<b>" + getCapsSentences(key.replace("_" , " ")) + "</b> ";
