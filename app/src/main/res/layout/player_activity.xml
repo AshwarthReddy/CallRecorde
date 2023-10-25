@@ -37,6 +37,7 @@
                 android:text="Listen"
                 android:layout_gravity="center"
                 android:textStyle="bold"
+                android:textSize="18dp"
                 android:fontFamily="@font/opensansvariable"
                 android:textColor="@color/darkRecordingSelected"
                 android:gravity="center"/>

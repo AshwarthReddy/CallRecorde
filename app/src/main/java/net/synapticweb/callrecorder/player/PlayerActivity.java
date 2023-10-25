@@ -376,7 +376,7 @@ public class PlayerActivity extends BaseActivity {
             audio_result.setText("");
             ServerResponse sr = responseValue;
             JSONObject jj = new JSONObject(String.valueOf(sr.getData()));
-            //JSONObject obj = new JSONObject(jj1.toString());
+           // JSONObject obj = new JSONObject(jj1.toString());
            // JSONObject jj = obj.getJSONObject("minutes");
 
             for (Iterator<String> it = jj.keys(); it.hasNext(); ) {
@@ -385,17 +385,19 @@ public class PlayerActivity extends BaseActivity {
                 String[] finalValues = value.split("(?=[0-9])");
                 StringBuilder sb = new StringBuilder();
                 for(String part : finalValues) {
-                    if(part.matches(".*\\d+.*")) {
-                        System.out.println("part----" + part);
-                        sb.append("<br>");
+                    String pattern = "\\d+\\.";
+
+                    Pattern regexPattern = Pattern.compile(pattern);
+                    Matcher matcher = regexPattern.matcher(part);
+                    if(matcher.find()) {
+                        part += "<br>";
                     }
                     sb.append(part);
                 }
-                //System.out.println(key + " : " + value);
                 audio_result.setVisibility(View.VISIBLE);
                 bottom_text.setVisibility(View.VISIBLE);
                 String keyValue = "<b>" + getCapsSentences(key.replace("_" , " ")) + "</b> ";
-                audio_result.append(Html.fromHtml("<br>" + keyValue + " : <br>" +  sb + "<br>"));
+                audio_result.append(Html.fromHtml("<br>" + keyValue + " : <br>" +  sb.toString() + "<br>"));
                 show_transcription.setBackground(getApplicationContext().getDrawable(R.drawable.rounded_corner));
                 show_transcription.setPadding(50, 30, 50 ,30);
                 show_transcription.setEnabled(true);
