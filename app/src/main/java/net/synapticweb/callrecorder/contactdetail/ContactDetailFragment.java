@@ -8,19 +8,26 @@
 
 package net.synapticweb.callrecorder.contactdetail;
 
+import android.Manifest;
 import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -40,6 +47,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.codekidlabs.storagechooser.Content;
@@ -60,8 +69,10 @@ import net.synapticweb.callrecorder.recorder.Recorder;
 import net.synapticweb.callrecorder.contactdetail.ContactDetailContract.Presenter;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -71,7 +82,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import static net.synapticweb.callrecorder.contactslist.ContactsListFragment.ARG_CONTACT;
+
 import net.synapticweb.callrecorder.Util.DialogInfo;
 
 import javax.inject.Inject;
@@ -88,11 +101,15 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
     protected boolean selectMode = false;
     protected List<Integer> selectedItems = new ArrayList<>();
     protected BaseActivity parentActivity;
-    /** Dacă există cel puțin un recording lipsă pe disc printre cele selectate, butonul de move se dezactivează.
-     *  Cind sunt 0 recorduri lispă se reactivează.*/
+    /**
+     * Dacă există cel puțin un recording lipsă pe disc printre cele selectate, butonul de move se dezactivează.
+     * Cind sunt 0 recorduri lispă se reactivează.
+     */
     private int selectedItemsDeleted = 0;
-    /** Un flag care este setat cînd un recording este șters. Semnifică faptul că fragmentul detaliu curent
-     * nu mai este valabil și trebuie înlocuit.TODO: de testat ce se întîmplă cînd se adaugă recording. */
+    /**
+     * Un flag care este setat cînd un recording este șters. Semnifică faptul că fragmentul detaliu curent
+     * nu mai este valabil și trebuie înlocuit.TODO: de testat ce se întîmplă cînd se adaugă recording.
+     */
     private boolean invalid = false;
     private static final String SELECT_MODE_KEY = "select_mode_key";
     private static final String SELECTED_ITEMS_KEY = "selected_items_key";
@@ -101,6 +118,8 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
     static final String EDIT_EXTRA_CONTACT = "edit_extra_contact";
     private static final int REQUEST_EDIT = 1;
     public static final String RECORDING_EXTRA = "recording_extra";
+
+    private static final int REQUEST_CODE_LOCATION_PERMISSION = 1;
 
     @Nullable
     @Override
@@ -113,14 +132,17 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         super.onCreate(savedInstanceState);
         adapter = new RecordingAdapter(new ArrayList<>(0));
         Bundle args = getArguments();
-        if(args != null)
+        if (args != null)
             contact = args.getParcelable(ARG_CONTACT);
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             selectMode = savedInstanceState.getBoolean(SELECT_MODE_KEY);
             selectedItems = savedInstanceState.getIntegerArrayList(SELECTED_ITEMS_KEY);
         }
+
+
     }
+
 
     @Nullable
     @Override
@@ -132,7 +154,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         recordingsRecycler = detailView.findViewById(R.id.recordings);
         //workaround necesar pentru că, dacă recyclerul cu recordinguri conține imagini poza asta devine neagră.
         // Se pare că numai pe lolipop, de verificat. https://github.com/hdodenhof/CircleImageView/issues/31
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
             contactPhotoView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 //        calculateCardViewDimensions();
         recordingsRecycler.setLayoutManager(new LinearLayoutManager(parentActivity));
@@ -144,7 +166,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         presenter.loadRecordings(contact);
     }
@@ -165,19 +187,18 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent){
-        if(resultCode == Activity.RESULT_OK) {
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_EDIT) {
                 Bundle result = intent.getExtras();
-                if(result != null) {
+                if (result != null) {
                     setContact(result.getParcelable(EditContactActivity.EDITED_CONTACT));
-                    if(parentActivity.getLayoutType() == LayoutType.SINGLE_PANE) {
+                    if (parentActivity.getLayoutType() == LayoutType.SINGLE_PANE) {
                         TextView title = parentActivity.findViewById(R.id.actionbar_title);
                         title.setText(contact.getContactName());
                     }
                 }
-            }
-            else if (requestCode == REQUEST_PICK_NUMBER) {
+            } else if (requestCode == REQUEST_PICK_NUMBER) {
                 Uri numberUri = intent.getData();
                 if (numberUri != null)
                     onAssignToContact(numberUri);
@@ -206,12 +227,13 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
      * Funcție apelată de presenter după ce termină de încărcat recordingurile. Afișează toate elementele
      * fragmentului ținînd cont de valoarea selectMode. Recordingurile sunt puse în starea corespunzătoare
      * nu aici, ci în onBindViewHolder.
+     *
      * @param recordings O listă cu recordinguri extrase de presenter și oferite fragmentului spre a fi afișate.
      */
     @Override
-    public void paintViews(List<Recording> recordings){
+    public void paintViews(List<Recording> recordings) {
         adapter.replaceData(recordings);
-        if(selectMode)
+        if (selectMode)
             putInSelectMode(false);
             //necesar pentru că 1: dacă în DOUBLE_PANE se clichează pe un contact în timp ce sunt selectate
             //recordinguri, actionbar-ul rămîne în select mode. 2: rezolvă un alt bug: dacă există un
@@ -223,13 +245,12 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         phoneNumberView.setText(Util.getSpannedText(String.format(getResources().getString(
                 R.string.detail_phonenumber), contact.isPrivateNumber() ? getString(R.string.private_number_name) : contact.getPhoneNumber()), null));
 
-        if(contact.getPhotoUri() != null) {
+        if (contact.getPhotoUri() != null) {
             contactPhotoView.clearColorFilter();
             contactPhotoView.setImageURI(null); //cînd se schimbă succesiv 2 poze făcute de cameră se folosește același fișier și optimizările android fac necesar acest hack pentru a obține refresh-ul pozei
             contactPhotoView.setImageURI(contact.getPhotoUri());
-        }
-        else {
-            if(contact.isPrivateNumber())
+        } else {
+            if (contact.isPrivateNumber())
                 contactPhotoView.setImageResource(R.drawable.incognito);
             else {
                 contactPhotoView.setImageResource(R.drawable.user_contact);
@@ -239,16 +260,21 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         }
 
         TextView noContent = detailView.findViewById(R.id.no_content_detail);
-        if(recordings.size() > 0)
+        if (recordings.size() > 0)
             noContent.setVisibility(View.GONE);
         else
             noContent.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public boolean isInvalid() { return invalid; }
+    public boolean isInvalid() {
+        return invalid;
+    }
+
     @Override
-    public void setInvalid(boolean invalid) { this.invalid = invalid; }
+    public void setInvalid(boolean invalid) {
+        this.invalid = invalid;
+    }
 
     /**
      * Această funcție este inclusă în interfața View. Rolul ei este să șteargă recordinguri din adapter cînd
@@ -256,6 +282,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
      * amestece în treburile unui fragment, dar dacă las updatarea adapterului pe seama fragmentului (după ce
      * rulează codul din presenter), e posibil să apară neconcordanțe cu realitatea în cazul în care are loc o
      * excepție în presenter.
+     *
      * @param recording recordingul care trebuie șters.
      */
     @Override
@@ -265,6 +292,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
 
     /**
      * Introduce fragmentul în modul selectOn.
+     *
      * @param animate Dacă transformarea actionBarului se va face cu animație sau fără.
      */
     protected void putInSelectMode(boolean animate) {
@@ -275,8 +303,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
 
     /**
      * Transformă aparența actionBarului în funcție de flagul selectMode.
+     *
      * @param animate Dacă afișările și disparițiile vor fi animate sau bruște. Cînd este apelat în paintView
-     * nu e nevoie de animație. Cînd e apelat din onLongClick transformările sunt animate.
+     *                nu e nevoie de animație. Cînd e apelat din onLongClick transformările sunt animate.
      */
     protected void toggleSelectModeActionBar(boolean animate) {
         ImageButton navigateBackBtn = parentActivity.findViewById(R.id.navigate_back);
@@ -290,29 +319,39 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         ImageButton menuRightSelectedBtn = parentActivity.findViewById(R.id.contact_detail_selected_menu);
 
         toggleTitle();
-        if(parentActivity.getLayoutType() == LayoutType.SINGLE_PANE)
-            if(selectMode) hideView(navigateBackBtn, animate); else showView(navigateBackBtn, animate);
+        if (parentActivity.getLayoutType() == LayoutType.SINGLE_PANE)
+            if (selectMode) hideView(navigateBackBtn, animate);
+            else showView(navigateBackBtn, animate);
 
-        if(selectMode) showView(closeBtn, animate); else hideView(closeBtn, animate);
-        if(!contact.isPrivateNumber()) {
-            if(selectMode) hideView(editBtn, animate); else showView(editBtn, animate);
-            if(selectMode) hideView(callBtn, animate); else showView(callBtn, animate);
+        if (selectMode) showView(closeBtn, animate);
+        else hideView(closeBtn, animate);
+        if (!contact.isPrivateNumber()) {
+            if (selectMode) hideView(editBtn, animate);
+            else showView(editBtn, animate);
+            if (selectMode) hideView(callBtn, animate);
+            else showView(callBtn, animate);
         }
-        if(selectMode) showView(moveBtn, animate); else hideView(moveBtn, animate);
-        if(selectMode) {
-            if(checkIfSelectedRecordingsDeleted())
+        if (selectMode) showView(moveBtn, animate);
+        else hideView(moveBtn, animate);
+        if (selectMode) {
+            if (checkIfSelectedRecordingsDeleted())
                 disableMoveBtn();
             else
                 enableMoveBtn();
         }
-        if(selectMode) showView(selectAllBtn, animate); else  hideView(selectAllBtn, animate);
-        if(selectMode) showView(infoBtn, animate); else hideView(infoBtn, animate);
-        if(selectMode) showView(menuRightSelectedBtn, animate); else hideView(menuRightSelectedBtn, animate);
-        if(selectMode) hideView(menuRightBtn, animate); else showView(menuRightBtn, animate);
+        if (selectMode) showView(selectAllBtn, animate);
+        else hideView(selectAllBtn, animate);
+        if (selectMode) showView(infoBtn, animate);
+        else hideView(infoBtn, animate);
+        if (selectMode) showView(menuRightSelectedBtn, animate);
+        else hideView(menuRightSelectedBtn, animate);
+        if (selectMode) hideView(menuRightBtn, animate);
+        else showView(menuRightBtn, animate);
 
-        if(parentActivity.getLayoutType() == LayoutType.DOUBLE_PANE) {
+        if (parentActivity.getLayoutType() == LayoutType.DOUBLE_PANE) {
             ImageButton hamburger = parentActivity.findViewById(R.id.hamburger);
-            if(selectMode) hideView(hamburger, animate); else showView(hamburger, animate);
+            if (selectMode) hideView(hamburger, animate);
+            else showView(hamburger, animate);
         }
     }
 
@@ -321,16 +360,16 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
      */
     protected void toggleTitle() {
         TextView title = parentActivity.findViewById(R.id.actionbar_title);
-        if(parentActivity.getLayoutType() == LayoutType.DOUBLE_PANE) {
+        if (parentActivity.getLayoutType() == LayoutType.DOUBLE_PANE) {
             Toolbar.LayoutParams params = (Toolbar.LayoutParams) title.getLayoutParams();
             params.gravity = selectMode ? Gravity.START : Gravity.CENTER;
             title.setLayoutParams(params);
         }
 
-        if(selectMode)
+        if (selectMode)
             title.setText(String.valueOf(selectedItems.size()));
         else {
-            if(parentActivity.getLayoutType() == LayoutType.SINGLE_PANE)
+            if (parentActivity.getLayoutType() == LayoutType.SINGLE_PANE)
                 title.setText(contact.getContactName());
             else
                 title.setText(R.string.app_name);
@@ -339,8 +378,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
 
     /**
      * Afișează sau ascunde un element cu un efect de fade-in sau fade-out care durează EFFECT_TIME
-     * @param view Elementul care va fi afișat sau ascuns
-     * @param finalAlpha valoarea alpha la care se ajunge în final
+     *
+     * @param view            Elementul care va fi afișat sau ascuns
+     * @param finalAlpha      valoarea alpha la care se ajunge în final
      * @param finalVisibility vi***zibilitatea finală: View.VISIBLE sau View.GONE
      */
     private void fadeEffect(View view, float finalAlpha, int finalVisibility) {
@@ -351,13 +391,16 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
                     @Override
                     public void onAnimationStart(Animator animator) {
                     }
+
                     @Override
                     public void onAnimationEnd(Animator animator) {
                         view.setVisibility(finalVisibility);
                     }
+
                     @Override
                     public void onAnimationCancel(Animator animator) {
                     }
+
                     @Override
                     public void onAnimationRepeat(Animator animator) {
                     }
@@ -365,7 +408,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
     }
 
     protected void hideView(View view, boolean animate) {
-        if(animate)
+        if (animate)
             fadeEffect(view, 0.0f, View.GONE);
         else {
             view.setAlpha(0.0f); //poate lipsi?
@@ -374,7 +417,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
     }
 
     protected void showView(View view, boolean animate) {
-        if(animate)
+        if (animate)
             fadeEffect(view, 1f, View.VISIBLE);
         else {
             view.setAlpha(1f); //poate lipsi?
@@ -395,6 +438,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
     /**
      * Modifică în funcție de selectMode marginile elementelor care compun vizual un recording. De asemenea
      * afișează sau ascunde căsuța de check.
+     *
      * @param recording Recordingul care va fi transformat.
      */
     private void modifyMargins(View recording) {
@@ -451,7 +495,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
      * tranziția este prea bruscă.
      */
     private void redrawRecordings() {
-        for(int i = 0; i < adapter.getItemCount(); ++i)
+        for (int i = 0; i < adapter.getItemCount(); ++i)
             adapter.notifyItemChanged(i);
     }
 
@@ -459,28 +503,28 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
      * Apelată cînd se clichează lung (selectMode=false) sau scurt(selectMode=true) pe un recording. Adaugă
      * poziția din adapter a recordingului în lista selectedItems și selectează ori deselectează itemul. Cînd
      * se deselectează ultimul item se iese din selectMode=true.
-     * @param recording recordingul clicat
+     *
+     * @param recording       recordingul clicat
      * @param adapterPosition poziția lui în adapter
-     * @param exists dacă există pe disc
+     * @param exists          dacă există pe disc
      */
     private void manageSelectRecording(View recording, int adapterPosition, boolean exists) {
-        if(!removeIfPresentInSelectedItems(adapterPosition)) {
+        if (!removeIfPresentInSelectedItems(adapterPosition)) {
             selectedItems.add(adapterPosition);
             selectRecording(recording);
-            if(!exists) {
+            if (!exists) {
                 selectedItemsDeleted++;
                 disableMoveBtn();
             }
-        }
-        else {
+        } else {
             deselectRecording(recording);
-            if(!exists)
+            if (!exists)
                 selectedItemsDeleted--;
-            if(selectedItemsDeleted == 0)
+            if (selectedItemsDeleted == 0)
                 enableMoveBtn();
         }
 
-        if(selectedItems.isEmpty())
+        if (selectedItems.isEmpty())
             clearSelectMode();
         else
             toggleTitle();
@@ -489,11 +533,12 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
 
     /**
      * Transformă colecția de poziții în adapter selectedItems într-o colecție de Recordinguri
+     *
      * @return O listă de obiecte Recording
      */
     private List<Recording> getSelectedRecordings() {
         List<Recording> list = new ArrayList<>();
-        for(int adapterPosition : selectedItems)
+        for (int adapterPosition : selectedItems)
             list.add(adapter.getItem(adapterPosition));
         return list;
     }
@@ -502,6 +547,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
      * Apelată de {@code manageSelectRecording()} cu poziția în adapter a recordingului pe care s-a clicat
      * (obținută cu adapter.getAdapterPosition()). Dacă poziția respectivă există deja în selectedItems o
      * scoate de acolo (deselectează).
+     *
      * @param adapterPosition o poziție în selectedItems
      * @return Dacă poziția există în selectedItems întoarce {@code true}. Altfel întoarce {@code false}.
      */
@@ -510,8 +556,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
             selectedItems.remove((Integer) adapterPosition); //fără casting îl interpretează ca poziție
             //în selectedItems
             return true;
-        }
-        else
+        } else
             return false;
     }
 
@@ -520,10 +565,10 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
      * lipsă pe disc. În caz că da va dezactiva mutarea recordingurilor.
      */
     protected boolean checkIfSelectedRecordingsDeleted() {
-        for(Recording recording : getSelectedRecordings())
-            if(!recording.exists())
+        for (Recording recording : getSelectedRecordings())
+            if (!recording.exists())
                 return true;
-            return false;
+        return false;
     }
 
 
@@ -544,29 +589,28 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
                 .negativeText(android.R.string.cancel)
                 .icon(getResources().getDrawable(R.drawable.warning))
                 .onPositive((@NonNull MaterialDialog dialog, @NonNull DialogAction which) -> {
-                        DialogInfo result = presenter.deleteContact(contact);
-                        if(result != null) {
-                            new MaterialDialog.Builder(parentActivity)
-                                    .title(result.title)
-                                    .content(result.message)
-                                    .iconRes(result.icon)
-                                    .positiveText(android.R.string.ok)
-                                    .show();
-                            return ;
-                        }
+                            DialogInfo result = presenter.deleteContact(contact);
+                            if (result != null) {
+                                new MaterialDialog.Builder(parentActivity)
+                                        .title(result.title)
+                                        .content(result.message)
+                                        .iconRes(result.icon)
+                                        .positiveText(android.R.string.ok)
+                                        .show();
+                                return;
+                            }
 
-                    if(parentActivity.getLayoutType() == LayoutType.DOUBLE_PANE) {
-                        setInvalid(true);
-                        ContactsListFragment listFragment = (ContactsListFragment)
-                                parentActivity.getSupportFragmentManager().findFragmentById(R.id.contacts_list_fragment_container);
-                        if(listFragment != null) {
-                            listFragment.resetCurrentPosition();
-                            listFragment.onResume();
+                            if (parentActivity.getLayoutType() == LayoutType.DOUBLE_PANE) {
+                                setInvalid(true);
+                                ContactsListFragment listFragment = (ContactsListFragment)
+                                        parentActivity.getSupportFragmentManager().findFragmentById(R.id.contacts_list_fragment_container);
+                                if (listFragment != null) {
+                                    listFragment.resetCurrentPosition();
+                                    listFragment.onResume();
+                                }
+                            } else
+                                parentActivity.finish();
                         }
-                    }
-                    else
-                        parentActivity.finish();
-                    }
                 )
                 .show();
     }
@@ -574,17 +618,18 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
     /**
      * Acțiunile care trebuie realizate în interfață cînd un recording este asignat la un nr normal
      * sau privat sunt identice. Motiv pentru care apelez de 2 ori această metodă.
+     *
      * @param result Rezultatul apelării metodei presenterului.
      */
     private void onAssignViewActions(DialogInfo result) {
-        if(result.icon == R.drawable.success) {
-            if(adapter.getItemCount() == 0) {
+        if (result.icon == R.drawable.success) {
+            if (adapter.getItemCount() == 0) {
                 View noContent = parentActivity.findViewById(R.id.no_content_detail);
-                if(noContent != null)
+                if (noContent != null)
                     noContent.setVisibility(View.VISIBLE);
             }
 
-            if(parentActivity.getLayoutType() == LayoutType.DOUBLE_PANE) {
+            if (parentActivity.getLayoutType() == LayoutType.DOUBLE_PANE) {
                 ContactsListFragment listFragment = (ContactsListFragment)
                         parentActivity.getSupportFragmentManager().findFragmentById(R.id.contacts_list_fragment_container);
                 setInvalid(true); //e nevoie?
@@ -615,9 +660,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
 
     private void onShowStorageInfo() {
         long sizePrivate = 0, sizePublic = 0;
-        for(Recording recording : adapter.getRecordings()) {
+        for (Recording recording : adapter.getRecordings()) {
             long size = new File(recording.getPath()).length();
-            if(recording.isSavedInPrivateSpace(parentActivity))
+            if (recording.isSavedInPrivateSpace(parentActivity))
                 sizePrivate += size;
             else
                 sizePublic += size;
@@ -642,18 +687,18 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
                 .inputType(InputType.TYPE_CLASS_TEXT)
                 .input(parentActivity.getResources().getString(R.string.rename_recording_input_text),
                         null, false, (@NonNull MaterialDialog dialog, CharSequence input) -> {
-                            if(selectedItems.size() != 1) {
+                            if (selectedItems.size() != 1) {
                                 CrLog.log(CrLog.WARN, "Calling onRenameClick when multiple recordings are selected");
-                                return ;
+                                return;
                             }
                             DialogInfo result = presenter.renameRecording(input, getSelectedRecordings().get(0));
-                            if(result != null)
+                            if (result != null)
                                 new MaterialDialog.Builder(parentActivity)
                                         .title(result.title)
-                                .content(result.message)
-                                .icon(getResources().getDrawable(result.icon))
-                                .positiveText(android.R.string.ok)
-                                .show();
+                                        .content(result.message)
+                                        .icon(getResources().getDrawable(result.icon))
+                                        .positiveText(android.R.string.ok)
+                                        .show();
                             else
                                 adapter.notifyItemChanged(selectedItems.get(0));
                         }
@@ -664,7 +709,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         new MaterialDialog.Builder(parentActivity)
                 .title(R.string.delete_recording_confirm_title)
                 .content(String.format(getResources().getString(
-                        R.string.delete_recording_confirm_message),
+                                R.string.delete_recording_confirm_message),
                         selectedItems.size()))
                 .positiveText(android.R.string.ok)
                 .negativeText(android.R.string.cancel)
@@ -673,7 +718,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
                              @NonNull DialogAction which) -> {
 
                     DialogInfo result = presenter.deleteRecordings(getSelectedRecordings());
-                    if(result != null)
+                    if (result != null)
                         new MaterialDialog.Builder(parentActivity)
                                 .title(result.title)
                                 .content(result.message)
@@ -681,9 +726,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
                                 .positiveText(android.R.string.ok)
                                 .show();
                     else {
-                        if(adapter.getItemCount() == 0) {
-                            View noContent  = parentActivity.findViewById(R.id.no_content_detail);
-                            if(noContent != null)
+                        if (adapter.getItemCount() == 0) {
+                            View noContent = parentActivity.findViewById(R.id.no_content_detail);
+                            if (noContent != null)
                                 noContent.setVisibility(View.VISIBLE);
                         }
                         clearSelectMode();
@@ -694,20 +739,20 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
 
     protected void onSelectAll() {
         List<Integer> notSelected = new ArrayList<>();
-        for(int i = 0; i < adapter.getItemCount(); ++i)
+        for (int i = 0; i < adapter.getItemCount(); ++i)
             notSelected.add(i);
         notSelected.removeAll(selectedItems);
 
-        for(int position : notSelected) {
+        for (int position : notSelected) {
             selectedItems.add(position);
             adapter.notifyItemChanged(position);
             //https://stackoverflow.com/questions/33784369/recyclerview-get-view-at-particular-position
             View selectedRecording = recordingsRecycler.getLayoutManager().findViewByPosition(position);
-            if(selectedRecording != null) //dacă recordingul nu este încă afișat pe ecran
-            // (sunt multe recordinguri și se scrolează) atunci selectedRecording va fi null. Dar mai înainte am
-            //notificat adapterul că s-a schimbat, ca să îl reconstruiască.
-                 selectRecording(selectedRecording);
-            }
+            if (selectedRecording != null) //dacă recordingul nu este încă afișat pe ecran
+                // (sunt multe recordinguri și se scrolează) atunci selectedRecording va fi null. Dar mai înainte am
+                //notificat adapterul că s-a schimbat, ca să îl reconstruiască.
+                selectRecording(selectedRecording);
+        }
         toggleTitle();
     }
 
@@ -723,7 +768,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
                     .content(String.format(parentActivity.getResources().getString(R.string.recordings_info_text), Util.getFileSizeHuman(totalSize)))
                     .positiveText(android.R.string.ok)
                     .show();
-            return ;
+            return;
         }
         MaterialDialog dialog = new MaterialDialog.Builder(parentActivity)
                 .title(R.string.recording_info_title)
@@ -731,9 +776,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
                 .positiveText(android.R.string.ok).build();
 
         //There should be only one if we are here:
-        if(selectedItems.size() != 1) {
+        if (selectedItems.size() != 1) {
             CrLog.log(CrLog.WARN, "Calling onInfoClick when multiple recordings are selected");
-            return ;
+            return;
         }
 
         Recording recording = adapter.getItem(selectedItems.get(0));
@@ -751,7 +796,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         TextView path = dialog.getView().findViewById(R.id.info_path_data);
         path.setText(recording.isSavedInPrivateSpace(parentActivity) ? parentActivity.getResources().
                 getString(R.string.private_storage) : recording.getPath());
-        if(!recording.exists()) {
+        if (!recording.exists()) {
             path.setText(String.format("%s%s", path.getText(), parentActivity.getResources().
                     getString(R.string.nonexistent_file)));
             path.setTextColor(parentActivity.getResources().getColor(android.R.color.holo_red_light));
@@ -764,15 +809,15 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         List<Recording> recordings = getSelectedRecordings();
         Recording[] recordingsArray = new Recording[recordings.size()];
 
-        for(Recording recording : recordings) {
-            if(new File(recording.getPath()).getParent().equals(path)) {
+        for (Recording recording : recordings) {
+            if (new File(recording.getPath()).getParent().equals(path)) {
                 new MaterialDialog.Builder(parentActivity)
                         .title(R.string.information_title)
                         .content(R.string.move_destination_same)
                         .positiveText("OK")
                         .icon(getResources().getDrawable(R.drawable.info))
                         .show();
-                return ;
+                return;
             }
             totalSize += new File(recording.getPath()).length();
         }
@@ -791,50 +836,49 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
 // în jurul unui stil din styles.xml. Stilul trebuie să moștenească din Theme.AppCompat.Light.NoActionBar
 // pentru temele light și din Theme.AppCompat.NoActionBar pentru cele dark, altfel background-ul
 // va avea culoarea greșită.
-                PopupMenu popupMenu = new PopupMenu(parentActivity,view);
-                popupMenu.setOnMenuItemClickListener((item) -> {
-                        switch (item.getItemId()) {
-                            case R.id.delete_phone_number:
-                                onDeleteContact();
-                                return true;
-                            case R.id.storage_info:
-                                onShowStorageInfo();
-                            default:
-                                return false;
-                        }
-                });
-                MenuInflater inflater = popupMenu.getMenuInflater();
-                inflater.inflate(R.menu.contact_popup, popupMenu.getMenu());
-                popupMenu.show();
+            PopupMenu popupMenu = new PopupMenu(parentActivity, view);
+            popupMenu.setOnMenuItemClickListener((item) -> {
+                switch (item.getItemId()) {
+                    case R.id.delete_phone_number:
+                        onDeleteContact();
+                        return true;
+                    case R.id.storage_info:
+                        onShowStorageInfo();
+                    default:
+                        return false;
+                }
             });
+            MenuInflater inflater = popupMenu.getMenuInflater();
+            inflater.inflate(R.menu.contact_popup, popupMenu.getMenu());
+            popupMenu.show();
+        });
 
         ImageButton editContact = parentActivity.findViewById(R.id.edit_contact);
         ImageButton callContact = parentActivity.findViewById(R.id.call_contact);
-        if(contact.isPrivateNumber()) {
+        if (contact.isPrivateNumber()) {
             callContact.setVisibility(View.GONE);
             editContact.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             callContact.setOnClickListener((View v) -> {
                 Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", contact.getPhoneNumber(), null));
                 startActivity(intent);
             });
 
             editContact.setOnClickListener((View v) -> {
-                Intent intent = new Intent(parentActivity, EditContactActivity.class);
-                intent.putExtra(EDIT_EXTRA_CONTACT, contact);
-                startActivityForResult(intent, REQUEST_EDIT);
-                }
+                        Intent intent = new Intent(parentActivity, EditContactActivity.class);
+                        intent.putExtra(EDIT_EXTRA_CONTACT, contact);
+                        startActivityForResult(intent, REQUEST_EDIT);
+                    }
             );
 
         }
         ImageButton closeBtn = parentActivity.findViewById(R.id.close_select_mode);
-        closeBtn.setOnClickListener((View v) -> clearSelectMode() );
+        closeBtn.setOnClickListener((View v) -> clearSelectMode());
 
         final ImageButton menuButtonSelectOn = parentActivity.findViewById(R.id.contact_detail_selected_menu);
         menuButtonSelectOn.setOnClickListener((View view) -> {
-                PopupMenu popupMenu = new PopupMenu(parentActivity, view);
-                popupMenu.setOnMenuItemClickListener((MenuItem item) -> {
+                    PopupMenu popupMenu = new PopupMenu(parentActivity, view);
+                    popupMenu.setOnMenuItemClickListener((MenuItem item) -> {
                         switch (item.getItemId()) {
                             case R.id.rename_recording:
                                 onRenameRecording();
@@ -855,15 +899,15 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
                         }
                     });
 
-                MenuInflater inflater = popupMenu.getMenuInflater();
-                inflater.inflate(R.menu.recording_selected_popup, popupMenu.getMenu());
-                MenuItem renameMenuItem = popupMenu.getMenu().findItem(R.id.rename_recording);
-                Recording recording = ((RecordingAdapter) recordingsRecycler.getAdapter()).
-                        getItem(selectedItems.get(0));
-                if(selectedItems.size() > 1 || !recording.exists())
-                    renameMenuItem.setEnabled(false);
-                popupMenu.show();
-            }
+                    MenuInflater inflater = popupMenu.getMenuInflater();
+                    inflater.inflate(R.menu.recording_selected_popup, popupMenu.getMenu());
+                    MenuItem renameMenuItem = popupMenu.getMenu().findItem(R.id.rename_recording);
+                    Recording recording = ((RecordingAdapter) recordingsRecycler.getAdapter()).
+                            getItem(selectedItems.get(0));
+                    if (selectedItems.size() > 1 || !recording.exists())
+                        renameMenuItem.setEnabled(false);
+                    popupMenu.show();
+                }
         );
 
         ImageButton moveBtn = parentActivity.findViewById(R.id.actionbar_select_move);
@@ -884,12 +928,12 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         inflater.inflate(R.menu.storage_chooser_options, menu);
 
         boolean allowMovePrivate = true;
-        for(Recording recording : getSelectedRecordings())
-            if(recording.isSavedInPrivateSpace(parentActivity)) {
+        for (Recording recording : getSelectedRecordings())
+            if (recording.isSavedInPrivateSpace(parentActivity)) {
                 allowMovePrivate = false;
                 break;
             }
-        for(int i = 0; i < menu.size(); i++) {
+        for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             SpannableString spanString = new SpannableString(menu.getItem(i).getTitle().toString());
             int end = spanString.length();
@@ -904,8 +948,9 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.private_storage: onMoveSelectedRecordings(parentActivity.
-                    getFilesDir().getAbsolutePath());
+            case R.id.private_storage:
+                onMoveSelectedRecordings(parentActivity.
+                        getFilesDir().getAbsolutePath());
                 return true;
             case R.id.public_storage:
                 Content content = new Content();
@@ -932,22 +977,44 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
                 chooser.setOnSelectListener(this::onMoveSelectedRecordings);
                 return true;
 
-            default: return super.onContextItemSelected(item);
+            default:
+                return super.onContextItemSelected(item);
         }
     }
 
     class RecordingHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        TextView title;
+        TextView title, latitude, longitude, full_address,recording_name;
         ImageView recordingType, recordingAdorn, exclamation;
         CheckBox checkBox;
 
         RecordingHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.recording, parent, false));
             recordingType = itemView.findViewById(R.id.recording_type);
+            latitude = itemView.findViewById(R.id.latitude);
+            longitude = itemView.findViewById(R.id.longitude);
+            full_address = itemView.findViewById(R.id.full_address);
             title = itemView.findViewById(R.id.recording_title);
+            recording_name = itemView.findViewById(R.id.recording_name);
             checkBox = itemView.findViewById(R.id.recording_checkbox);
             recordingAdorn = itemView.findViewById(R.id.recording_adorn);
             exclamation = itemView.findViewById(R.id.recording_exclamation);
+
+
+            SharedPreferences latlongvalues = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+            String fullAddress = getAddressFromLocation(latlongvalues.getLong("LATITUDE_VALUE", 0),
+                    latlongvalues.getLong("LONGITUDE_VALUE", 0));
+
+            assert fullAddress != null;
+            String[] ff = fullAddress.split("-");
+
+            full_address.setText(ff[1] + " " + ff[2]);
+
+            latitude.setText(String.valueOf(latlongvalues.getLong("LATITUDE_VALUE", 0)));
+            longitude.setText(String.valueOf(latlongvalues.getLong("LONGITUDE_VALUE", 0)));
+
+            latitude.setVisibility(View.GONE);
+            longitude.setVisibility(View.GONE);
 
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
@@ -955,7 +1022,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
 
         @Override
         public boolean onLongClick(View v) {
-            if(!selectMode)
+            if (!selectMode)
                 putInSelectMode(true);
             Recording recording = adapter.getItem(getAdapterPosition());
             manageSelectRecording(v, this.getAdapterPosition(), recording.exists());
@@ -965,15 +1032,14 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         @Override
         public void onClick(View v) {
             Recording recording = adapter.getItem(getAdapterPosition());
-            if(selectMode)
+            if (selectMode)
                 manageSelectRecording(v, this.getAdapterPosition(), recording.exists());
             else { //usual short click
-                if(recording.exists()) {
+                if (recording.exists()) {
                     Intent playIntent = new Intent(parentActivity, PlayerActivity.class);
                     playIntent.putExtra(RECORDING_EXTRA, recording);
                     startActivity(playIntent);
-                }
-                else
+                } else
                     Toast.makeText(parentActivity, R.string.audio_file_missing, Toast.LENGTH_SHORT).show();
             }
         }
@@ -1015,38 +1081,46 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
             return recordings.get(position);
         }
 
+        @SuppressLint("SetTextI18n")
         @Override
         public void onBindViewHolder(@NonNull RecordingHolder holder, final int position) {
             final Recording recording = recordings.get(position);
             int adornRes;
             switch (recording.getFormat()) {
-                case Recorder.WAV_FORMAT: adornRes = parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
-                        R.drawable.sound_symbol_wav_light : R.drawable.sound_symbol_wav_dark;
+                case Recorder.WAV_FORMAT:
+                    adornRes = parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
+                            R.drawable.sound_symbol_wav_light : R.drawable.sound_symbol_wav_dark;
                     break;
-                case Recorder.AAC_HIGH_FORMAT: adornRes = parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
-                        R.drawable.sound_symbol_aac128_light : R.drawable.sound_symbol_aac128_dark;
+                case Recorder.AAC_HIGH_FORMAT:
+                    adornRes = parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
+                            R.drawable.sound_symbol_aac128_light : R.drawable.sound_symbol_aac128_dark;
                     break;
-                case Recorder.AAC_BASIC_FORMAT: adornRes = parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
-                        R.drawable.sound_symbol_aac32_light : R.drawable.sound_symbol_aac32_dark;
+                case Recorder.AAC_BASIC_FORMAT:
+                    adornRes = parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
+                            R.drawable.sound_symbol_aac32_light : R.drawable.sound_symbol_aac32_dark;
                     break;
-                default:adornRes = parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
-                        R.drawable.sound_symbol_aac64_light : R.drawable.sound_symbol_aac64_dark;
+                default:
+                    adornRes = parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
+                            R.drawable.sound_symbol_aac64_light : R.drawable.sound_symbol_aac64_dark;
             }
 
             holder.title.setText(recording.getName());
-            if(contact == null || !contact.isPrivateNumber())
+            if(recording.getContactId() != null) {
+                holder.recording_name.setText(recording.getContactId().toString());
+            }
+            if (contact == null || !contact.isPrivateNumber())
                 holder.recordingType.setImageResource(recording.isIncoming() ? R.drawable.incoming :
-                    parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
-                            R.drawable.outgoing_light : R.drawable.outgoing_dark);
+                        parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
+                                R.drawable.outgoing_light : R.drawable.outgoing_dark);
             holder.recordingAdorn.setImageResource(adornRes);
             holder.checkBox.setOnClickListener((View view) ->
                     manageSelectRecording(view, position, recording.exists()));
 
-            if(!recording.exists())
+            if (!recording.exists())
                 markNonexistent(holder);
 
             modifyMargins(holder.itemView);
-            if(selectedItems.contains(position))
+            if (selectedItems.contains(position))
                 selectRecording(holder.itemView);
             else
                 deselectRecording(holder.itemView);
@@ -1057,7 +1131,7 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
 //https://stackoverflow.com/questions/25454316/how-do-i-partially-gray-out-an-image-when-pressed
             //A se vedea și https://stackoverflow.com/questions/28308325/androidset-gray-scale-filter-to-imageview
             int filter = parentActivity.getSettedTheme().equals(BaseActivity.LIGHT_THEME) ?
-                    Color.argb(255,0,0,0) : Color.argb(255,255, 255, 255);
+                    Color.argb(255, 0, 0, 0) : Color.argb(255, 255, 255, 255);
             holder.recordingAdorn.setColorFilter(filter);
             holder.recordingType.setColorFilter(filter);
             holder.recordingAdorn.setImageAlpha(100);
@@ -1088,4 +1162,21 @@ public class ContactDetailFragment extends Fragment implements ContactDetailCont
         }
 
     }
+
+
+    private String getAddressFromLocation(double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses.size() > 0) {
+                String address = addresses.get(0).getAddressLine(0);
+                return address; // addressTextView.setText("Address: " + address);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

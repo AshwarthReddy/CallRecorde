@@ -9,10 +9,12 @@
 package net.synapticweb.callrecorder.data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import android.preference.PreferenceManager;
 import androidx.annotation.Nullable;
 
 import net.synapticweb.callrecorder.R;
@@ -42,6 +44,9 @@ public class Recording implements Parcelable {
     private String mode;
     private String source;
 
+    private double latitude;
+    private double longitude;
+
     public Recording() {}
 
     public Recording(Long id, Long contactId, String path, Boolean incoming, Long startTimestamp, Long endTimestamp,
@@ -56,6 +61,22 @@ public class Recording implements Parcelable {
         if(format != null) this.format = format;
         if(mode != null) this.mode = mode;
         if(source != null) this.source = source;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public boolean exists() {

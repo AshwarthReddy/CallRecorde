@@ -9,17 +9,22 @@
 package net.synapticweb.callrecorder.contactslist;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -36,13 +41,19 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.location.*;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import net.synapticweb.callrecorder.R;
 import net.synapticweb.callrecorder.BaseActivity;
 import net.synapticweb.callrecorder.HelpActivity;
+import net.synapticweb.callrecorder.contactdetail.ContactDetailActivity;
+import net.synapticweb.callrecorder.player.AppConstants;
+import net.synapticweb.callrecorder.player.GpsUtils;
 import net.synapticweb.callrecorder.settings.SettingsActivity;
 import net.synapticweb.callrecorder.setup.SetupActivity;
+
+import java.util.Locale;
 
 
 public class ContactsListActivityMain extends BaseActivity {
@@ -52,6 +63,15 @@ public class ContactsListActivityMain extends BaseActivity {
     public static final int PERMS_NOT_GRANTED = 2;
     public static final int POWER_OPTIMIZED = 4;
     public static final String SETUP_ARGUMENT = "setup_arg";
+
+    private FusedLocationProviderClient mFusedLocationClient;
+    private double wayLatitude = 0.0, wayLongitude = 0.0;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+    private StringBuilder stringBuilder;
+
+    private boolean isContinue = false;
+    private boolean isGPS = false;
 
     @Override
     protected Fragment createFragment() {
@@ -79,6 +99,70 @@ public class ContactsListActivityMain extends BaseActivity {
         TextView title = findViewById(R.id.actionbar_title);
         title.setText(getString(R.string.app_name));
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(10 * 1000); // 10 seconds
+        locationRequest.setFastestInterval(5 * 1000); // 5 seconds
+
+        new GpsUtils(this).turnGPSOn(new GpsUtils.onGpsListener() {
+            @Override
+            public void gpsStatus(boolean isGPSEnable) {
+                // turn on GPS
+                isGPS = isGPSEnable;
+            }
+        });
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    if (location != null) {
+                        wayLatitude = location.getLatitude();
+                        wayLongitude = location.getLongitude();
+                        if (!isContinue) {
+                            //Toast.makeText(getApplicationContext(), String.format(Locale.US, "%s - %s", wayLatitude, wayLongitude), Toast.LENGTH_SHORT).show();
+                            //txtLocation.setText(String.format(Locale.US, "%s - %s", wayLatitude, wayLongitude));
+                        } else {
+                            stringBuilder.append(wayLatitude);
+                            stringBuilder.append("-");
+                            stringBuilder.append(wayLongitude);
+                            stringBuilder.append("\n\n");
+                           // Toast.makeText(getApplicationContext(),stringBuilder.toString(), Toast.LENGTH_SHORT).show();
+
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putLong("LATITUDE_VALUE", (long) wayLatitude);
+                            editor.putLong("LONGITUDE_VALUE", (long) wayLongitude);
+                            editor.apply();
+
+                            // txtContinueLocation.setText(stringBuilder.toString());
+                        }
+                        if (!isContinue && mFusedLocationClient != null) {
+                            mFusedLocationClient.removeLocationUpdates(locationCallback);
+                        }
+                    }
+                }
+            }
+        };
+
+
+
+        if (!isGPS) {
+            Toast.makeText(this, "Please turn on GPS", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        isContinue = true;
+        stringBuilder = new StringBuilder();
+        getLocation();
+
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -238,6 +322,11 @@ public class ContactsListActivityMain extends BaseActivity {
             if(data.getBooleanExtra(SetupActivity.EXIT_APP, true))
                 finish();
         }
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == AppConstants.GPS_REQUEST) {
+                isGPS = true; // flag maintain before get location
+            }
+        }
     }
 
     @Override
@@ -266,5 +355,65 @@ public class ContactsListActivityMain extends BaseActivity {
                 == PackageManager.PERMISSION_GRANTED;
         return phoneState && recordAudio && readContacts && readStorage && writeStorage;
     }
+
+
+    private void getLocation() {
+        if (ActivityCompat.checkSelfPermission(ContactsListActivityMain.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(ContactsListActivityMain.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(ContactsListActivityMain.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    AppConstants.LOCATION_REQUEST);
+
+        } else {
+            if (isContinue) {
+                mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+            } else {
+                mFusedLocationClient.getLastLocation().addOnSuccessListener(ContactsListActivityMain.this, location -> {
+                    if (location != null) {
+                        wayLatitude = location.getLatitude();
+                        wayLongitude = location.getLongitude();
+                        Toast.makeText(this, String.format(Locale.US, "%s - %s", wayLatitude, wayLongitude), Toast.LENGTH_SHORT).show();
+                        // txtLocation.setText(String.format(Locale.US, "%s - %s", wayLatitude, wayLongitude));
+                    } else {
+                        mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+                    }
+                });
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 1000: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (isContinue) {
+                        mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+                    } else {
+                        mFusedLocationClient.getLastLocation().addOnSuccessListener(ContactsListActivityMain.this, location -> {
+                            if (location != null) {
+                                wayLatitude = location.getLatitude();
+                                wayLongitude = location.getLongitude();
+                                Toast.makeText(this, String.format(Locale.US, "%s - %s", wayLatitude, wayLongitude), Toast.LENGTH_SHORT).show();
+
+                                //txtLocation.setText(String.format(Locale.US, "%s - %s", wayLatitude, wayLongitude));
+                            } else {
+                                mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+                            }
+                        });
+                    }
+                } else {
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+        }
+    }
+
+
 
 }
