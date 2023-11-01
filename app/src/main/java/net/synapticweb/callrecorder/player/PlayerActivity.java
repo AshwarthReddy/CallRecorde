@@ -118,38 +118,43 @@ public class PlayerActivity extends BaseActivity {
         show_transcription.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    audio_result.setText("Waiting for transcription...");
-                    show_transcription.setBackground(getApplicationContext().getDrawable(R.drawable.rounded_corner_disable));
-                    show_transcription.setPadding(50, 30, 50, 30);
-                    show_transcription.setEnabled(false);
+
+                audio_result.setText("Waiting for transcription...");
+                show_transcription.setBackground(getApplicationContext().getDrawable(R.drawable.rounded_corner_disable));
+                show_transcription.setPadding(50, 30, 50, 30);
+                show_transcription.setEnabled(false);
 
 
-                    SharedPreferences savedValues = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences savedValues = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-                   String savedId =  savedValues.getString("TRANSCRIPTION_ID_"+recording.getId().toString() , null);
+                String savedId =  savedValues.getString("TRANSCRIPTION_ID_"+recording.getId().toString() , null);
 
-                   System.out.println("==--" + savedId + "==--" + recording.getId());
+                System.out.println("==--" + savedId + "==--" + recording.getId());
 
-                   if(savedId != null && (Long.parseLong(savedId)  == recording.getId())) {
-                      String transValue = savedValues.getString("TRANSCRIPTION_"+recording.getId().toString() , "");
-                       System.out.println("==----jsonValue string---" + transValue);
-                       JSONObject jsonObject = new JSONObject(transValue);
-                       System.out.println("==----jsonValue---" + jsonObject);
-                       printValues(null , jsonObject);
-                   } else {
-                       sendFile(recording.getPath());
-                   }
-
-
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
+                if(savedId != null && (Long.parseLong(savedId)  == recording.getId())) {
+                   String transValue = savedValues.getString("TRANSCRIPTION_"+recording.getId().toString() , "");
+                    System.out.println("==----jsonValue string---" + transValue);
+                    JSONObject jsonObject = null;
+                    try {
+                        jsonObject = new JSONObject(transValue);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.println("==----jsonValue---" + jsonObject);
+                    printValues(null , jsonObject);
+                } else {
+                    try {
+                        sendFile(recording.getPath());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+
+
+
+
                 /*Intent playIntent = new Intent(PlayerActivity.this, VoskActivity.class);
                 playIntent.putExtra(RECORDING_EXTRA, recording);
                 startActivity(playIntent);*/
@@ -397,9 +402,9 @@ public class PlayerActivity extends BaseActivity {
                     Pattern regexPattern = Pattern.compile(pattern);
                     Matcher matcher = regexPattern.matcher(part);
                     if (matcher.find()) {
-                        part += "<br>";
+                        part += "";
                     }
-                    sb.append(part);
+                    sb.append(part.replace("\n", "<br>") );
                 }
                 audio_result.setVisibility(View.VISIBLE);
                 bottom_text.setVisibility(View.VISIBLE);
